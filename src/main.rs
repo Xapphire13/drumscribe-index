@@ -86,6 +86,10 @@ fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
     let mut groups = HashMap::new();
 
     for song in songs {
+        if song.sequence_number.is_empty() {
+            continue;
+        }
+
         let key = song.artist.to_lowercase();
         groups
             .entry(key)
@@ -99,6 +103,14 @@ fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
 
     let mut result: Vec<_> = groups.into_values().collect();
     result.sort_unstable_by_key(|group| group.artist.to_lowercase());
+
+    for group in &mut result {
+        group
+            .songs
+            .sort_unstable_by_key(|song| song.title.to_lowercase());
+
+        group.songs.dedup_by_key(|song| song.title.to_lowercase());
+    }
 
     result
 }
@@ -130,12 +142,23 @@ async fn main() -> Result<()> {
 
             page_number += 1;
         }
+
+        index_cache.save()?;
     }
 
     let groups = group_songs(index_cache.songs.clone());
-    println!("{groups:#?}",);
 
-    index_cache.save()?;
+    for group in &groups {
+        println!("# {}", group.artist);
+        for song in &group.songs {
+            println!(
+                "- {} | #{} | {}",
+                song.title, song.sequence_number, song.difficulty
+            );
+        }
+
+        println!("");
+    }
 
     Ok(())
 }
