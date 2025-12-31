@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, sync::OnceLock};
 
 use anyhow::{Error, anyhow};
 use regex::Regex;
@@ -8,6 +8,7 @@ use crate::{
     models::song::{Difficulty, Song},
 };
 
+static SEQUENCE_NUMBER_REGEX: OnceLock<Regex> = OnceLock::new();
 const TRANSCRIPTION_CATEGORY_ID: usize = 73_044;
 
 impl From<&Vec<Tag>> for Difficulty {
@@ -73,7 +74,7 @@ impl FromStr for SongDetails {
         let title = split.next().unwrap_or("Unknown").trim();
         split = split.next().unwrap_or("").split(" | ");
         let artist = split.next().unwrap_or("Unknown").trim();
-        let re = Regex::new(r"#(\d+)").unwrap();
+        let re = SEQUENCE_NUMBER_REGEX.get_or_init(|| Regex::new(r"#(\d+)").unwrap());
         let sequence_number = if let Some(captures) = re.captures(split.next().unwrap_or("")) {
             captures.get(1).unwrap().as_str()
         } else {

@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
 };
@@ -106,7 +107,15 @@ async fn main() -> Result<()> {
         }
     }
 
-    println!("{index_cache:#?}");
+    let mut groups = HashMap::new();
+
+    for song in &index_cache.songs {
+        groups.entry(&song.artist).or_insert(Vec::new()).push(song);
+    }
+
+    let mut artists = groups.keys().collect::<Vec<_>>();
+    artists.sort_unstable_by_key(|artist| artist.to_lowercase());
+    println!("{:#?}", artists);
 
     index_cache.save()?;
 
