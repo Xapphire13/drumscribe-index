@@ -5,6 +5,7 @@ use regex::Regex;
 
 use crate::{
     api::post::{Post as ApiPost, Tag},
+    corrections::correct_artist,
     models::song::{Difficulty, Song},
 };
 
@@ -82,7 +83,7 @@ impl FromStr for SongDetails {
         };
 
         Ok(Self {
-            artist: artist.to_owned(),
+            artist: correct_artist(artist).to_owned(),
             title: title.to_owned(),
             sequence_number: sequence_number.to_owned(),
         })

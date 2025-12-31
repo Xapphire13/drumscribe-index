@@ -8,10 +8,14 @@ use anyhow::{Result, anyhow};
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
-use crate::{api::post::Post, models::song::Song};
+use crate::{
+    api::post::Post,
+    models::song::{Song, SongGroup},
+};
 
 mod api;
 mod conversions;
+mod corrections;
 mod models;
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
@@ -78,6 +82,27 @@ fn create_data_dir() -> Result<PathBuf> {
     Ok(data_dir.to_path_buf())
 }
 
+fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
+    let mut groups = HashMap::new();
+
+    for song in songs {
+        let key = song.artist.to_lowercase();
+        groups
+            .entry(key)
+            .or_insert(SongGroup {
+                artist: song.artist.clone(),
+                songs: vec![],
+            })
+            .songs
+            .push(song);
+    }
+
+    let mut result: Vec<_> = groups.into_values().collect();
+    result.sort_unstable_by_key(|group| group.artist.to_lowercase());
+
+    result
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let data_dir = create_data_dir()?;
@@ -107,15 +132,8 @@ async fn main() -> Result<()> {
         }
     }
 
-    let mut groups = HashMap::new();
-
-    for song in &index_cache.songs {
-        groups.entry(&song.artist).or_insert(Vec::new()).push(song);
-    }
-
-    let mut artists = groups.keys().collect::<Vec<_>>();
-    artists.sort_unstable_by_key(|artist| artist.to_lowercase());
-    println!("{:#?}", artists);
+    let groups = group_songs(index_cache.songs.clone());
+    println!("{groups:#?}",);
 
     index_cache.save()?;
 
