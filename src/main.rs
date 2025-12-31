@@ -1,14 +1,20 @@
-use anyhow::Result;
-use serde::Deserialize;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
-use crate::models::post::{Category, Post, Tag};
+use anyhow::{Result, anyhow};
+use directories::ProjectDirs;
+use serde::{Deserialize, Serialize};
+
+use crate::{api::post::Post, models::song::Song};
 
 mod api;
 mod conversions;
 mod models;
 
+const INDEX_CACHE_FILENAME: &str = "index.bin";
 const API_URL: &str = "https://app.buymeacoffee.com/api/v1/posts/creator/drumscribe?per_page=20&page=:page_number&filter_by=new";
-const EXHAUSTIVE: bool = false;
 
 fn get_request_url(page: usize) -> String {
     API_URL.replace(":page_number", &page.to_string())
@@ -18,9 +24,6 @@ fn get_request_url(page: usize) -> String {
 struct PageMeta {
     current_page: usize,
     last_page: usize,
-    from: usize,
-    to: usize,
-    total: usize,
 }
 
 #[derive(Debug, Deserialize)]
@@ -29,39 +32,83 @@ struct PageResponse<T> {
     meta: PageMeta,
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let mut transcriptions: Vec<_> = vec![];
+#[derive(Debug, Serialize, Deserialize, Default)]
+struct IndexCache {
+    #[serde(skip)]
+    path: PathBuf,
+    songs: Vec<Song>,
+}
 
-    let mut page_number = 1;
-    loop {
-        print!("Fetching page {page_number}...");
-        let response = reqwest::get(get_request_url(page_number)).await?;
-        let page: PageResponse<api::post::Post> = response.json().await?;
+impl IndexCache {
+    fn load(data_dir: &Path) -> Result<Self> {
+        let index_cache_path = data_dir.join(INDEX_CACHE_FILENAME);
 
-        let posts: Vec<_> = page
-            .data
-            .iter()
-            .map(Post::from)
-            .filter(|post| {
-                post.tags
-                    .iter()
-                    .any(|tag| matches!(tag, Tag::Category(Category::Transcription)))
-            })
-            .collect();
+        let index_cache = if let Ok(bytes) = fs::read(&index_cache_path) {
+            postcard::from_bytes::<IndexCache>(&bytes)?
+        } else {
+            IndexCache::default()
+        };
 
-        transcriptions.extend(posts);
-
-        println!(" done!");
-
-        if !EXHAUSTIVE || page.meta.current_page == page.meta.last_page {
-            break;
-        }
-
-        page_number += 1;
+        Ok(IndexCache {
+            path: index_cache_path,
+            ..index_cache
+        })
     }
 
-    println!("{transcriptions:#?}");
+    fn save(&self) -> Result<()> {
+        let bytes = postcard::to_allocvec(self)?;
+        fs::write(&self.path, &bytes)?;
+
+        Ok(())
+    }
+
+    fn is_empty(&self) -> bool {
+        self.songs.is_empty()
+    }
+}
+
+fn create_data_dir() -> Result<PathBuf> {
+    let project_dirs = ProjectDirs::from("com", "xapphire13", env!("CARGO_PKG_NAME"))
+        .ok_or(anyhow!("Can't load project dirs"))?;
+
+    let data_dir = project_dirs.data_dir();
+    fs::create_dir_all(data_dir)?;
+
+    Ok(data_dir.to_path_buf())
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let data_dir = create_data_dir()?;
+
+    let mut index_cache = IndexCache::load(&data_dir)?;
+
+    if index_cache.is_empty() {
+        let mut page_number = 1;
+        loop {
+            print!("Fetching page {page_number}...");
+            let response: PageResponse<Post> = reqwest::get(get_request_url(page_number))
+                .await?
+                .json()
+                .await?;
+
+            let page: Vec<_> = response.data.iter().flat_map(Song::try_from).collect();
+
+            index_cache.songs.extend(page);
+
+            println!(" done!");
+
+            if response.meta.current_page == response.meta.last_page {
+                break;
+            }
+
+            page_number += 1;
+        }
+    }
+
+    println!("{index_cache:#?}");
+
+    index_cache.save()?;
 
     Ok(())
 }
