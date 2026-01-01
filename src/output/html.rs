@@ -1,7 +1,11 @@
 use anyhow::Result;
 use maud::{DOCTYPE, PreEscaped, html};
 
-use crate::{group_songs, models::song::Song, output::Formatter};
+use crate::{
+    group_songs,
+    models::song::{Difficulty, Song},
+    output::Formatter,
+};
 
 const STYLES: &str = include_str!("styles.css");
 
@@ -28,10 +32,20 @@ impl Formatter for HtmlFormatter {
                             div.artist-header { (group.artist) }
                             table.song-table {
                                 @for song in &group.songs {
+                                    @let difficulty_class = match song.difficulty {
+                                        Difficulty::Beginner => "difficulty-beginner",
+                                        Difficulty::Intermediate => "difficulty-intermediate",
+                                        Difficulty::Advanced => "difficulty-advanced",
+                                        Difficulty::Expert => "difficulty-expert",
+                                        Difficulty::Master => "difficulty-master",
+                                        Difficulty::Unrated => "difficulty-unrated",
+                                    };
                                     tr.item.song-item {
                                         td.song-title { (song.title) }
                                         td.song-number { "#" (song.sequence_number) }
-                                        td.song-difficulty { (song.difficulty) }
+                                        td.song-difficulty {
+                                            div.song-difficulty-pill.(difficulty_class) { (song.difficulty) }
+                                        }
                                     }
                                 }
                             }
