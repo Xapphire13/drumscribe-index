@@ -21,7 +21,7 @@ impl Formatter for HtmlFormatter {
                         "* { box-sizing: border-box; }"
                         "body { font-family: Arial, sans-serif; margin: 0 auto; padding: 20px; background-color: white; max-width: 800px; }"
                         ".item { break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; margin-bottom: 0.5em; }"
-                        ".artist-header { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 6px; margin: 0.5em 0 8px 0; font-size: 1.1em; font-weight: bold; }"
+                        ".artist-header { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 6px; margin: 0.5em 0 8px 0; font-size: 1.1em; font-weight: bold; break-after: avoid; page-break-after: avoid; }"
                         ".artist-header:first-child { margin-top: 0; }"
                         ".song-item { background: white; padding: 6px 8px; border-radius: 3px; border: 1px solid #e0e0e0; font-size: 0.85em; margin-bottom: 4px; }"
                         ".song-title { font-weight: bold; color: #007bff; }"
@@ -32,14 +32,16 @@ impl Formatter for HtmlFormatter {
                 }
                 body {
                     @for group in &groups {
-                        div.item.artist-header { (group.artist) }
-                        @for song in &group.songs {
-                            div.item.song-item {
-                                span.song-title { (song.title) }
-                                " | "
-                                span.song-number { "#" (song.sequence_number) }
-                                " | "
-                                span.song-difficulty { (song.difficulty) }
+                        div.artist-group {
+                            div.item.artist-header { (group.artist) }
+                            @for song in &group.songs {
+                                div.item.song-item {
+                                    span.song-title { (song.title) }
+                                    " | "
+                                    span.song-number { "#" (song.sequence_number) }
+                                    " | "
+                                    span.song-difficulty { (song.difficulty) }
+                                }
                             }
                         }
                     }
