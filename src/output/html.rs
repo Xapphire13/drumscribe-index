@@ -25,14 +25,14 @@ impl Formatter for HtmlFormatter {
                 body {
                     @for group in &groups {
                         div.artist-group {
-                            div.item.artist-header { (group.artist) }
-                            @for song in &group.songs {
-                                div.item.song-item {
-                                    span.song-title { (song.title) }
-                                    " | "
-                                    span.song-number { "#" (song.sequence_number) }
-                                    " | "
-                                    span.song-difficulty { (song.difficulty) }
+                            div.artist-header { (group.artist) }
+                            table.song-table {
+                                @for song in &group.songs {
+                                    tr.item.song-item {
+                                        td.song-title { (song.title) }
+                                        td.song-number { "#" (song.sequence_number) }
+                                        td.song-difficulty { (song.difficulty) }
+                                    }
                                 }
                             }
                         }

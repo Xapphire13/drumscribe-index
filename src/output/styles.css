@@ -22,13 +22,20 @@ body {
     page-break-inside: avoid;
 }
 
+.song-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
 .artist-group + .artist-group {
-    margin-top: 24pt;
+    margin-top: 12pt;
 }
 
 .artist-header {
-    border-bottom: 1pt solid black;
-    padding-bottom: 6pt;
+    background-color: #333;
+    color: white;
+    border-radius: 4pt;
+    padding: 6pt;
     margin: 6pt 0 8pt 0;
     font-size: 12pt;
     font-weight: bold;
@@ -36,11 +43,7 @@ body {
     page-break-after: avoid;
 }
 
-.artist-header:first-child {
-    margin-top: 0;
-}
-
-.song-item {
+.song-item td {
     padding: 2pt 6pt;
 }
 
@@ -51,11 +54,15 @@ body {
 
 .song-number {
     color: #666;
+    white-space: nowrap;
+    width: 1%;
 }
 
 .song-difficulty {
     color: #28a745;
     font-style: italic;
+    white-space: nowrap;
+    width: 1%;
 }
 
 @media print {
