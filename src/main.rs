@@ -97,7 +97,7 @@ fn create_data_dir() -> Result<PathBuf> {
     Ok(data_dir.to_path_buf())
 }
 
-fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
+fn group_songs(songs: &[Song]) -> Vec<SongGroup> {
     let mut groups = HashMap::new();
 
     for song in songs {
@@ -113,7 +113,7 @@ fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
                 songs: vec![],
             })
             .songs
-            .push(song);
+            .push(song.clone());
     }
 
     let mut result: Vec<_> = groups.into_values().collect();

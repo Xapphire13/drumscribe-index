@@ -7,7 +7,7 @@ pub struct MarkdownFormatter;
 
 impl Formatter for MarkdownFormatter {
     fn format(&self, songs: &[Song]) -> Result<String> {
-        let groups = group_songs(songs.to_vec());
+        let groups = group_songs(songs);
 
         let mut result = String::new();
 
