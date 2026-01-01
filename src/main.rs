@@ -11,12 +11,14 @@ use serde::{Deserialize, Serialize};
 use crate::{
     api::{coffee_api::CoffeeApi, post::Post},
     models::song::{Song, SongGroup},
+    output::markdown::MarkdownFormatter,
 };
 
 mod api;
 mod conversions;
 mod corrections;
 mod models;
+mod output;
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
 
@@ -137,19 +139,8 @@ async fn main() -> Result<()> {
         index_cache.save()?;
     }
 
-    let groups = group_songs(index_cache.songs.clone());
-
-    for group in &groups {
-        println!("# {}", group.artist);
-        for song in &group.songs {
-            println!(
-                "- {} | #{} | {}",
-                song.title, song.sequence_number, song.difficulty
-            );
-        }
-
-        println!("");
-    }
+    let formatter = MarkdownFormatter;
+    print!("{}", formatter.format(&index_cache.songs)?);
 
     Ok(())
 }
