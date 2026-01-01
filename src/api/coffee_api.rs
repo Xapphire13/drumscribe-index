@@ -1,4 +1,4 @@
-use anyhow::{Error, Result};
+use anyhow::{Result, anyhow};
 use reqwest::Client;
 
 use crate::{PageResponse, api::post::Post};
@@ -23,7 +23,13 @@ impl CoffeeApi {
             .await?
             .json::<PageResponse<Post>>()
             .await
-            .map_err(Error::msg)
+            .map_err(|e| {
+                anyhow!(
+                    "Failed to deserialize posts from page {}: {}",
+                    page_number,
+                    e
+                )
+            })
     }
 
     fn get_request_url(page: usize) -> String {

@@ -1,13 +1,13 @@
 use anyhow::Result;
 
-use crate::{group_songs, models::song::Song};
+use crate::{group_songs, models::song::Song, output::Formatter};
 use std::fmt::Write;
 
 pub struct MarkdownFormatter;
 
-impl MarkdownFormatter {
-    pub fn format(&self, songs: &Vec<Song>) -> Result<String> {
-        let groups = group_songs(songs.clone());
+impl Formatter for MarkdownFormatter {
+    fn format(&self, songs: &[Song]) -> Result<String> {
+        let groups = group_songs(songs.to_vec());
 
         let mut result = String::new();
 

@@ -35,7 +35,7 @@ pub struct Song {
     pub sequence_number: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct SongGroup {
     pub artist: String,
     pub songs: Vec<Song>,

@@ -3,10 +3,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Tag {
-    #[serde()]
-    Category {
-        category_id: usize,
-    },
+    Category { category_id: usize },
     Other,
 }
 

@@ -5,13 +5,14 @@ use std::{
 };
 
 use anyhow::{Result, anyhow};
+use clap::Parser;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     api::{coffee_api::CoffeeApi, post::Post},
     models::song::{Song, SongGroup},
-    output::markdown::MarkdownFormatter,
+    output::{Formatter, html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter},
 };
 
 mod api;
@@ -19,6 +20,23 @@ mod conversions;
 mod corrections;
 mod models;
 mod output;
+
+#[derive(Parser)]
+#[command(name = "drumscribe-index")]
+#[command(about = "DrumScribe song index generator")]
+struct Cli {
+    /// Output in JSON format (default)
+    #[arg(long, group = "format")]
+    json: bool,
+
+    /// Output in Markdown format
+    #[arg(long, group = "format")]
+    markdown: bool,
+
+    /// Output in HTML format
+    #[arg(long, group = "format")]
+    html: bool,
+}
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
 
@@ -114,6 +132,7 @@ fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let cli = Cli::parse();
     let data_dir = create_data_dir()?;
     let mut index_cache = IndexCache::load(&data_dir)?;
     let coffee_api = CoffeeApi::new();
@@ -139,7 +158,15 @@ async fn main() -> Result<()> {
         index_cache.save()?;
     }
 
-    let formatter = MarkdownFormatter;
+    let formatter: Box<dyn Formatter> = if cli.markdown {
+        Box::new(MarkdownFormatter)
+    } else if cli.html {
+        Box::new(HtmlFormatter)
+    } else {
+        // Default to JSON
+        Box::new(JsonFormatter)
+    };
+
     print!("{}", formatter.format(&index_cache.songs)?);
 
     Ok(())
