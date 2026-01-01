@@ -1,0 +1,76 @@
+@page {
+    size: letter portrait;
+    margin: 0.5in;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    max-width: 800px;
+    font-size: 10pt;
+}
+
+.item {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.artist-group + .artist-group {
+    margin-top: 24pt;
+}
+
+.artist-header {
+    border-bottom: 1pt solid black;
+    padding-bottom: 6pt;
+    margin: 6pt 0 8pt 0;
+    font-size: 12pt;
+    font-weight: bold;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.artist-header:first-child {
+    margin-top: 0;
+}
+
+.song-item {
+    padding: 2pt 6pt;
+}
+
+.song-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.song-number {
+    color: #666;
+}
+
+.song-difficulty {
+    color: #28a745;
+    font-style: italic;
+}
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+        max-width: none;
+        column-count: 2;
+        column-gap: 0.25in;
+        column-fill: auto;
+        orphans: 2;
+        widows: 2;
+    }
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
