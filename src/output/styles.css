@@ -47,6 +47,10 @@ body {
     padding: 2pt 6pt;
 }
 
+.song-item:nth-child(even) {
+    background-color: #eee;
+}
+
 .song-title {
     font-weight: bold;
     color: #333;

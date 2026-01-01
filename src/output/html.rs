@@ -42,8 +42,8 @@ impl Formatter for HtmlFormatter {
                                     };
                                     tr.item.song-item {
                                         td.song-title { (song.title) }
-                                        td.song-number { "#" (song.sequence_number) }
                                         td.song-difficulty { (stars) }
+                                        td.song-number { "#" (song.sequence_number) }
                                     }
                                 }
                             }
