@@ -9,7 +9,7 @@ use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    api::post::Post,
+    api::{coffee_api::CoffeeApi, post::Post},
     models::song::{Song, SongGroup},
 };
 
@@ -19,11 +19,6 @@ mod corrections;
 mod models;
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
-const API_URL: &str = "https://app.buymeacoffee.com/api/v1/posts/creator/drumscribe?per_page=20&page=:page_number&filter_by=new";
-
-fn get_request_url(page: usize) -> String {
-    API_URL.replace(":page_number", &page.to_string())
-}
 
 #[derive(Debug, Deserialize)]
 struct PageMeta {
@@ -118,18 +113,14 @@ fn group_songs(songs: Vec<Song>) -> Vec<SongGroup> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let data_dir = create_data_dir()?;
-
     let mut index_cache = IndexCache::load(&data_dir)?;
+    let coffee_api = CoffeeApi::new();
 
     if index_cache.is_empty() {
         let mut page_number = 1;
         loop {
             print!("Fetching page {page_number}...");
-            let response: PageResponse<Post> = reqwest::get(get_request_url(page_number))
-                .await?
-                .json()
-                .await?;
-
+            let response: PageResponse<Post> = coffee_api.get_posts(page_number).await?;
             let page: Vec<_> = response.data.iter().flat_map(Song::try_from).collect();
 
             index_cache.songs.extend(page);
