@@ -59,42 +59,10 @@ body {
 }
 
 .song-difficulty {
-    text-align: center;
-    font-weight: bold;
+    text-align: right;
     white-space: nowrap;
     width: 1%;
-    color: white;
-    font-size: 9pt;
-}
-
-.song-difficulty-pill {
-    padding: 2pt 6pt;
-    border-radius: 4pt;
-}
-
-.difficulty-beginner {
-    background-color: #1e7e34;
-}
-
-.difficulty-intermediate {
-    background-color: #117a8b;
-}
-
-.difficulty-advanced {
-    background-color: #d39e00;
-}
-
-.difficulty-expert {
-    background-color: #dc3545;
-}
-
-.difficulty-master {
-    background-color: #8b0000;
-}
-
-.difficulty-unrated {
-    background-color: #666;
-    font-weight: normal;
+    color: #333;
 }
 
 @media print {

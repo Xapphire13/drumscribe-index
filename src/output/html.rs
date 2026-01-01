@@ -32,20 +32,18 @@ impl Formatter for HtmlFormatter {
                             div.artist-header { (group.artist) }
                             table.song-table {
                                 @for song in &group.songs {
-                                    @let difficulty_class = match song.difficulty {
-                                        Difficulty::Beginner => "difficulty-beginner",
-                                        Difficulty::Intermediate => "difficulty-intermediate",
-                                        Difficulty::Advanced => "difficulty-advanced",
-                                        Difficulty::Expert => "difficulty-expert",
-                                        Difficulty::Master => "difficulty-master",
-                                        Difficulty::Unrated => "difficulty-unrated",
+                                    @let stars = match song.difficulty {
+                                        Difficulty::Beginner => "★",
+                                        Difficulty::Intermediate => "★★",
+                                        Difficulty::Advanced => "★★★",
+                                        Difficulty::Expert => "★★★★",
+                                        Difficulty::Master => "★★★★★",
+                                        Difficulty::Unrated => "—",
                                     };
                                     tr.item.song-item {
                                         td.song-title { (song.title) }
                                         td.song-number { "#" (song.sequence_number) }
-                                        td.song-difficulty {
-                                            div.song-difficulty-pill.(difficulty_class) { (song.difficulty) }
-                                        }
+                                        td.song-difficulty { (stars) }
                                     }
                                 }
                             }
