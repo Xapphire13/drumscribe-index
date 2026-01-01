@@ -12,7 +12,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
     api::{coffee_api::CoffeeApi, post::Post},
     models::song::{Song, SongGroup},
-    output::{Formatter, html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter},
+    output::{
+        Formatter, html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
+        xlsx::XlsxFormatter,
+    },
 };
 
 mod api;
@@ -36,6 +39,10 @@ struct Cli {
     /// Output in HTML format
     #[arg(long, group = "format")]
     html: bool,
+
+    /// Output in XLSX format to the specified file path
+    #[arg(long, group = "format", value_name = "PATH")]
+    xlsx: Option<String>,
 }
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
@@ -158,16 +165,24 @@ async fn main() -> Result<()> {
         index_cache.save()?;
     }
 
-    let formatter: Box<dyn Formatter> = if cli.markdown {
-        Box::new(MarkdownFormatter)
-    } else if cli.html {
-        Box::new(HtmlFormatter)
+    if let Some(xlsx_path) = cli.xlsx {
+        // XLSX format writes to a file instead of stdout
+        let formatter = XlsxFormatter;
+        formatter.format_to_file(&index_cache.songs, &xlsx_path)?;
+        println!("XLSX file saved to: {xlsx_path}");
     } else {
-        // Default to JSON
-        Box::new(JsonFormatter)
-    };
+        // Text-based formats output to stdout
+        let formatter: Box<dyn Formatter> = if cli.markdown {
+            Box::new(MarkdownFormatter)
+        } else if cli.html {
+            Box::new(HtmlFormatter)
+        } else {
+            // Default to JSON
+            Box::new(JsonFormatter)
+        };
 
-    print!("{}", formatter.format(&index_cache.songs)?);
+        print!("{}", formatter.format(&index_cache.songs)?);
+    }
 
     Ok(())
 }
