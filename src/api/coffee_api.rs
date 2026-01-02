@@ -23,13 +23,7 @@ impl CoffeeApi {
             .await?
             .json::<PageResponse<Post>>()
             .await
-            .map_err(|e| {
-                anyhow!(
-                    "Failed to deserialize posts from page {}: {}",
-                    page_number,
-                    e
-                )
-            })
+            .map_err(|e| anyhow!("Failed to deserialize posts from page {page_number}: {e}",))
     }
 
     fn get_request_url(page: usize) -> String {

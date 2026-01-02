@@ -9,7 +9,7 @@ use crate::{
 pub struct XlsxFormatter;
 
 impl XlsxFormatter {
-    pub fn format_to_file(&self, songs: &[Song], path: &str) -> Result<()> {
+    pub fn format_to_file(songs: &[Song], path: &str) -> Result<()> {
         let groups = group_songs(songs);
 
         let mut workbook = Workbook::new();
@@ -18,18 +18,18 @@ impl XlsxFormatter {
         // Create formats
         let header_format = Format::new()
             .set_bold()
-            .set_background_color(Color::RGB(0x000000))
+            .set_background_color(Color::RGB(0x00_00_00))
             .set_font_color(Color::White);
 
         let artist_header_format = Format::new()
             .set_bold()
-            .set_background_color(Color::RGB(0x000000))
+            .set_background_color(Color::RGB(0x00_00_00))
             .set_font_color(Color::White)
             .set_font_size(14);
 
-        let alternate_row_format = Format::default().set_background_color(Color::RGB(0xF5F5F5));
+        let alternate_row_format = Format::default().set_background_color(Color::RGB(0xF5_F5_F5));
         let alternate_row_hyperlink_format = Format::default()
-            .set_background_color(Color::RGB(0xF5F5F5))
+            .set_background_color(Color::RGB(0xF5_F5_F5))
             .set_hyperlink();
 
         // Set column widths

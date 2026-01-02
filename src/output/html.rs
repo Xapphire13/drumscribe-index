@@ -1,18 +1,16 @@
-use anyhow::Result;
 use maud::{DOCTYPE, PreEscaped, html};
 
 use crate::{
     group_songs,
     models::song::{Difficulty, Song},
-    output::Formatter,
 };
 
 const STYLES: &str = include_str!("styles.css");
 
 pub struct HtmlFormatter;
 
-impl Formatter for HtmlFormatter {
-    fn format(&self, songs: &[Song]) -> Result<String> {
+impl HtmlFormatter {
+    pub fn format(songs: &[Song]) -> String {
         let groups = group_songs(songs);
 
         let markup = html! {
@@ -53,6 +51,6 @@ impl Formatter for HtmlFormatter {
             }
         };
 
-        Ok(markup.into_string())
+        markup.into_string()
     }
 }

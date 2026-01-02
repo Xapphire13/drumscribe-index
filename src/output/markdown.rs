@@ -1,12 +1,12 @@
 use anyhow::Result;
 
-use crate::{group_songs, models::song::Song, output::Formatter};
+use crate::{group_songs, models::song::Song};
 use std::fmt::Write;
 
 pub struct MarkdownFormatter;
 
-impl Formatter for MarkdownFormatter {
-    fn format(&self, songs: &[Song]) -> Result<String> {
+impl MarkdownFormatter {
+    pub fn format(songs: &[Song]) -> Result<String> {
         let groups = group_songs(songs);
 
         let mut result = String::new();
@@ -21,7 +21,7 @@ impl Formatter for MarkdownFormatter {
                 )?;
             }
 
-            writeln!(result, "")?;
+            writeln!(result)?;
         }
 
         Ok(result.trim().to_string())

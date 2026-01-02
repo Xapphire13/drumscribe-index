@@ -13,8 +13,7 @@ use crate::{
     api::{coffee_api::CoffeeApi, post::Post},
     models::song::{Song, SongGroup},
     output::{
-        Formatter, html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
-        xlsx::XlsxFormatter,
+        html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter, xlsx::XlsxFormatter,
     },
 };
 
@@ -27,6 +26,7 @@ mod output;
 #[derive(Parser)]
 #[command(name = "drumscribe-index")]
 #[command(about = "DrumScribe song index generator")]
+#[allow(clippy::struct_excessive_bools)]
 struct Cli {
     /// Output in JSON format (default)
     #[arg(long, group = "format")]
@@ -202,27 +202,24 @@ async fn main() -> Result<()> {
     if cli.xlsx
         && let Some(output_path) = cli.output
     {
-        // XLSX format writes to a file instead of stdout
-        let formatter = XlsxFormatter;
-        formatter.format_to_file(&index_cache.songs, &output_path)?;
+        // XLSX format writes to a file instead of returning text-based result
+        XlsxFormatter::format_to_file(&index_cache.songs, &output_path)?;
         println!("XLSX file saved to: {output_path}");
     } else {
         let file_type;
 
-        // Text-based formats output to stdout
-        let formatter: Box<dyn Formatter> = if cli.markdown {
+        // Text-based formats
+        let formatted = if cli.markdown {
             file_type = "Markdown";
-            Box::new(MarkdownFormatter)
+            MarkdownFormatter::format(&index_cache.songs)?
         } else if cli.html {
             file_type = "HTML";
-            Box::new(HtmlFormatter)
+            HtmlFormatter::format(&index_cache.songs)
         } else {
             // Default to JSON
             file_type = "JSON";
-            Box::new(JsonFormatter)
+            JsonFormatter::format(&index_cache.songs)?
         };
-
-        let formatted = formatter.format(&index_cache.songs)?;
 
         if let Some(output_path) = cli.output {
             fs::write(&output_path, formatted)?;
