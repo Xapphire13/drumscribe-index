@@ -26,13 +26,13 @@ before - the installation is straightforward:
 1. **Install Rust**: Visit [https://rustup.rs](https://rustup.rs) and follow the
    instructions for your operating system.
    
-   - On macOS/Linux, run: ```bash curl --proto '=https' --tlsv1.2 -sSf
+   - On macOS/Linux, run: ```curl --proto '=https' --tlsv1.2 -sSf
      https://sh.rustup.rs | sh ```
    
    - On Windows, download and run the installer from the website.
 
 2. **Verify the installation**: After installation, close and reopen your
-   terminal, then run: ```bash cargo --version ``` You should see the Cargo
+   terminal, then run: ```cargo --version``` You should see the Cargo
    version number displayed.
 
 ### Installing Drumscribe Index
