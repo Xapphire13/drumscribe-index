@@ -41,8 +41,16 @@ struct Cli {
     html: bool,
 
     /// Output in XLSX format to the specified file path
-    #[arg(long, group = "format", value_name = "PATH")]
-    xlsx: Option<String>,
+    #[arg(long, group = "format", requires = "output")]
+    xlsx: bool,
+
+    /// Saves output to specified file path
+    #[arg(long, value_name = "PATH")]
+    output: Option<String>,
+
+    /// Update list of indexed songs
+    #[arg(long)]
+    update: bool,
 }
 
 const INDEX_CACHE_FILENAME: &str = "index.bin";
@@ -144,18 +152,44 @@ async fn main() -> Result<()> {
     let mut index_cache = IndexCache::load(&data_dir)?;
     let coffee_api = CoffeeApi::new();
 
-    if index_cache.is_empty() {
+    if index_cache.is_empty() || cli.update {
+        let highest_sequence_number = index_cache
+            .songs
+            .iter()
+            .flat_map(|s| s.sequence_number.parse::<usize>())
+            .max();
         let mut page_number = 1;
+
         loop {
             print!("Fetching page {page_number}...");
             let response: PageResponse<Post> = coffee_api.get_posts(page_number).await?;
             let page: Vec<_> = response.data.iter().flat_map(Song::try_from).collect();
 
-            index_cache.songs.extend(page);
+            let mut reached_existing_content = false;
+
+            // Only add songs we havent already indexed
+            let new_songs = page.into_iter().filter(|s| {
+                if let Some(highest_sequence_number) = highest_sequence_number
+                    && let Ok(sequence_number) = s.sequence_number.parse::<usize>()
+                {
+                    let is_new = sequence_number > highest_sequence_number;
+
+                    // We've caught up to our index
+                    if !is_new {
+                        reached_existing_content = true;
+                    }
+
+                    is_new
+                } else {
+                    true
+                }
+            });
+
+            index_cache.songs.extend(new_songs);
 
             println!(" done!");
 
-            if response.meta.current_page == response.meta.last_page {
+            if reached_existing_content || response.meta.current_page == response.meta.last_page {
                 break;
             }
 
@@ -165,23 +199,37 @@ async fn main() -> Result<()> {
         index_cache.save()?;
     }
 
-    if let Some(xlsx_path) = cli.xlsx {
+    if cli.xlsx
+        && let Some(output_path) = cli.output
+    {
         // XLSX format writes to a file instead of stdout
         let formatter = XlsxFormatter;
-        formatter.format_to_file(&index_cache.songs, &xlsx_path)?;
-        println!("XLSX file saved to: {xlsx_path}");
+        formatter.format_to_file(&index_cache.songs, &output_path)?;
+        println!("XLSX file saved to: {output_path}");
     } else {
+        let file_type;
+
         // Text-based formats output to stdout
         let formatter: Box<dyn Formatter> = if cli.markdown {
+            file_type = "Markdown";
             Box::new(MarkdownFormatter)
         } else if cli.html {
+            file_type = "HTML";
             Box::new(HtmlFormatter)
         } else {
             // Default to JSON
+            file_type = "JSON";
             Box::new(JsonFormatter)
         };
 
-        print!("{}", formatter.format(&index_cache.songs)?);
+        let formatted = formatter.format(&index_cache.songs)?;
+
+        if let Some(output_path) = cli.output {
+            fs::write(&output_path, formatted)?;
+            println!("{file_type} file saved to: {output_path}");
+        } else {
+            print!("{formatted}");
+        }
     }
 
     Ok(())

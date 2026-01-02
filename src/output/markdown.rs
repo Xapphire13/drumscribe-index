@@ -24,6 +24,6 @@ impl Formatter for MarkdownFormatter {
             writeln!(result, "")?;
         }
 
-        Ok(result)
+        Ok(result.trim().to_string())
     }
 }
