@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rust_xlsxwriter::{Color, Format, Workbook};
+use rust_xlsxwriter::{Color, Format, Url, Workbook};
 
 use crate::{
     group_songs,
@@ -27,7 +27,10 @@ impl XlsxFormatter {
             .set_font_color(Color::White)
             .set_font_size(14);
 
-        let alternate_row_format = Format::new().set_background_color(Color::RGB(0xF5F5F5));
+        let alternate_row_format = Format::default().set_background_color(Color::RGB(0xF5F5F5));
+        let alternate_row_hyperlink_format = Format::default()
+            .set_background_color(Color::RGB(0xF5F5F5))
+            .set_hyperlink();
 
         // Set column widths
         worksheet.set_column_width(0, 40)?; // Title
@@ -66,11 +69,11 @@ impl XlsxFormatter {
 
                 // Alternate row backgrounds
                 if idx % 2 == 1 {
-                    worksheet.write_with_format(
+                    worksheet.write_url_with_format(
                         current_row,
                         0,
-                        &song.title,
-                        &alternate_row_format,
+                        Url::new(&song.link).set_text(&song.title),
+                        &alternate_row_hyperlink_format,
                     )?;
                     worksheet.write_with_format(
                         current_row,
@@ -85,7 +88,11 @@ impl XlsxFormatter {
                         &alternate_row_format,
                     )?;
                 } else {
-                    worksheet.write(current_row, 0, &song.title)?;
+                    worksheet.write_url(
+                        current_row,
+                        0,
+                        Url::new(&song.link).set_text(&song.title),
+                    )?;
                     worksheet.write(current_row, 1, difficulty_str)?;
                     worksheet.write(current_row, 2, &song.sequence_number)?;
                 }
