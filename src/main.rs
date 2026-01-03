@@ -106,7 +106,7 @@ fn group_songs(songs: &[Song]) -> Vec<SongGroup> {
 async fn main() -> Result<()> {
     let cli = Cli::parse();
     let data_dir = create_data_dir()?;
-    let mut index_cache = IndexCache::load(&data_dir)?;
+    let mut index_cache = IndexCache::load(&data_dir);
     let coffee_api = CoffeeApi::new();
 
     if index_cache.is_empty() || cli.update {

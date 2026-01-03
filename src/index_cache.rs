@@ -20,10 +20,10 @@ pub struct IndexCache {
 }
 
 impl IndexCache {
-    pub fn load(data_dir: &Path) -> Result<Self> {
+    pub fn load(data_dir: &Path) -> Self {
         let index_cache_path = data_dir.join(INDEX_CACHE_FILENAME);
 
-        let index_cache: IndexCache = if let Ok(bytes) = fs::read(&index_cache_path) {
+        if let Ok(bytes) = fs::read(&index_cache_path) {
             IndexCache {
                 path: index_cache_path,
                 ..postcard::from_bytes(&bytes).unwrap_or(IndexCache::default())
@@ -33,9 +33,7 @@ impl IndexCache {
                 path: index_cache_path,
                 ..IndexCache::default()
             }
-        };
-
-        Ok(index_cache)
+        }
     }
 
     pub fn save(&self) -> Result<()> {
