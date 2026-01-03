@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use maud::{DOCTYPE, PreEscaped, html};
 
 use crate::{
@@ -10,7 +11,7 @@ const STYLES: &str = include_str!("styles.css");
 pub struct HtmlFormatter;
 
 impl HtmlFormatter {
-    pub fn format(songs: &[Song]) -> String {
+    pub fn format(songs: &[Song], last_indexed: DateTime<Utc>) -> String {
         let groups = group_songs(songs);
 
         let markup = html! {
@@ -25,6 +26,12 @@ impl HtmlFormatter {
                     }
                 }
                 body {
+                    h1.heading {
+                        "Drumscribe Index"
+                    }
+                    p.timestamp {
+                        span.timestamp-label { "Last indexed:" } (last_indexed.format("%v %r %Z"))
+                    }
                     @for group in &groups {
                         div.artist-group {
                             div.artist-header { (group.artist) }

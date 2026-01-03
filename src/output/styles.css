@@ -16,6 +16,18 @@ body {
     font-size: 10pt;
 }
 
+.heading {
+    margin: 0;
+}
+
+.timestamp {
+    margin: 0 0 12pt 0;
+}
+
+.timestamp-label {
+    font-weight: bold;
+}
+
 .item {
     break-inside: avoid;
     -webkit-column-break-inside: avoid;
@@ -36,7 +48,7 @@ body {
     color: white;
     border-radius: 4pt;
     padding: 6pt;
-    margin: 6pt 0 8pt 0;
+    margin-bottom: 8pt;
     font-size: 12pt;
     font-weight: bold;
     break-after: avoid;

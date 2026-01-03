@@ -173,7 +173,7 @@ async fn main() -> Result<()> {
             MarkdownFormatter::format(&index_cache.songs)?
         } else if cli.html {
             file_type = "HTML";
-            HtmlFormatter::format(&index_cache.songs)
+            HtmlFormatter::format(&index_cache.songs, index_cache.last_indexed)
         } else {
             // Default to JSON
             file_type = "JSON";
