@@ -1,9 +1,22 @@
 use anyhow::{Result, anyhow};
 use reqwest::Client;
+use serde::Deserialize;
 
-use crate::{PageResponse, api::post::Post};
+use crate::api::post::Post;
 
 const API_URL: &str = "https://app.buymeacoffee.com/api/v1/posts/creator/drumscribe?per_page=20&page=:page_number&filter_by=new";
+
+#[derive(Debug, Deserialize)]
+pub struct PageMeta {
+    pub current_page: usize,
+    pub last_page: usize,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PageResponse<T> {
+    pub data: Vec<T>,
+    pub meta: PageMeta,
+}
 
 pub struct CoffeeApi {
     client: Client,

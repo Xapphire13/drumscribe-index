@@ -1,16 +1,21 @@
 use std::{
     collections::HashMap,
     fs,
-    path::{Path, PathBuf},
+    io::{self, Write},
+    path::PathBuf,
 };
 
 use anyhow::{Result, anyhow};
+use chrono::Utc;
 use clap::Parser;
 use directories::ProjectDirs;
-use serde::{Deserialize, Serialize};
 
 use crate::{
-    api::{coffee_api::CoffeeApi, post::Post},
+    api::{
+        coffee_api::{CoffeeApi, PageResponse},
+        post::Post,
+    },
+    index_cache::IndexCache,
     models::song::{Song, SongGroup},
     output::{
         html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter, xlsx::XlsxFormatter,
@@ -20,6 +25,7 @@ use crate::{
 mod api;
 mod conversions;
 mod corrections;
+mod index_cache;
 mod models;
 mod output;
 
@@ -51,55 +57,6 @@ struct Cli {
     /// Update list of indexed songs
     #[arg(long)]
     update: bool,
-}
-
-const INDEX_CACHE_FILENAME: &str = "index.bin";
-
-#[derive(Debug, Deserialize)]
-struct PageMeta {
-    current_page: usize,
-    last_page: usize,
-}
-
-#[derive(Debug, Deserialize)]
-struct PageResponse<T> {
-    data: Vec<T>,
-    meta: PageMeta,
-}
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-struct IndexCache {
-    #[serde(skip)]
-    path: PathBuf,
-    songs: Vec<Song>,
-}
-
-impl IndexCache {
-    fn load(data_dir: &Path) -> Result<Self> {
-        let index_cache_path = data_dir.join(INDEX_CACHE_FILENAME);
-
-        let index_cache = if let Ok(bytes) = fs::read(&index_cache_path) {
-            postcard::from_bytes::<IndexCache>(&bytes)?
-        } else {
-            IndexCache::default()
-        };
-
-        Ok(IndexCache {
-            path: index_cache_path,
-            ..index_cache
-        })
-    }
-
-    fn save(&self) -> Result<()> {
-        let bytes = postcard::to_allocvec(self)?;
-        fs::write(&self.path, &bytes)?;
-
-        Ok(())
-    }
-
-    fn is_empty(&self) -> bool {
-        self.songs.is_empty()
-    }
 }
 
 fn create_data_dir() -> Result<PathBuf> {
@@ -162,6 +119,7 @@ async fn main() -> Result<()> {
 
         loop {
             print!("Fetching page {page_number}...");
+            io::stdout().flush()?;
             let response: PageResponse<Post> = coffee_api.get_posts(page_number).await?;
             let page: Vec<_> = response.data.iter().flat_map(Song::try_from).collect();
 
@@ -196,6 +154,7 @@ async fn main() -> Result<()> {
             page_number += 1;
         }
 
+        index_cache.last_indexed = Utc::now();
         index_cache.save()?;
     }
 
