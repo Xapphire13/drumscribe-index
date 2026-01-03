@@ -25,14 +25,16 @@ before - the installation is straightforward:
 
 1. **Install Rust**: Visit [https://rustup.rs](https://rustup.rs) and follow the
    instructions for your operating system.
-   
-   - On macOS/Linux, run: ```curl --proto '=https' --tlsv1.2 -sSf
-     https://sh.rustup.rs | sh ```
-   
-   - On Windows, download and run the installer from the website.
+
+   - On macOS/Linux, run: `curl --proto '=https' --tlsv1.2 -sSf
+     https://sh.rustup.rs | sh`
+
+   - On Windows, download and run the installer from the website. _(Note: you need
+     to install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+     prior)_
 
 2. **Verify the installation**: After installation, close and reopen your
-   terminal, then run: ```cargo --version``` You should see the Cargo
+   terminal, then run: `cargo --version` You should see the Cargo
    version number displayed.
 
 ### Installing Drumscribe Index
@@ -45,26 +47,32 @@ Once Rust is installed, you have two options:
 cargo install --git https://github.com/Xapphire13/drumscribe-index.git
 ```
 
-This installs the program directly from the repository to your Cargo bin directory (usually `~/.cargo/bin/`), making it available system-wide as `drumscribe-index`.
+This installs the program directly from the repository to your Cargo bin directory
+(usually `~/.cargo/bin/`), making it available system-wide as `drumscribe-index`.
 
 #### Option 2: Build from source
 
 1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/Xapphire13/drumscribe-index.git
-   cd drumscribe-index
-   ```
+
+    ```bash
+    git clone https://github.com/Xapphire13/drumscribe-index.git
+    cd drumscribe-index
+    ```
 
 2. **Build the program**:
-   ```bash
-   cargo build --release
-   ```
-   This will compile the program. The first build may take a few minutes as it downloads and compiles dependencies.
+
+    ```bash
+    cargo build --release
+    ```
+
+   This will compile the program. The first build may take a few minutes as it
+   downloads and compiles dependencies.
 
 3. **The compiled program** will be located at:
-   ```
-   target/release/drumscribe-index
-   ```
+
+    ```text
+    target/release/drumscribe-index
+    ```
 
 ## Usage
 
@@ -72,7 +80,7 @@ This installs the program directly from the repository to your Cargo bin directo
 
 Run the program to generate a JSON index (printed to your terminal):
 
-```bash 
+```bash
 cargo run --release
 ```
 
@@ -87,21 +95,25 @@ Or use the compiled binary directly:
 Choose your preferred output format using command-line flags:
 
 **JSON (default)**:
+
 ```bash
 drumscribe-index --json 
 ```
 
 **Markdown**:
+
 ```bash
 drumscribe-index --markdown 
 ```
 
 **HTML**:
+
 ```bash
 drumscribe-index --html
 ```
 
 **Excel (XLSX)**: Requires specifying an output file
+
 ```bash
 drumscribe-index --xlsx --output songs.xlsx
 ```
@@ -137,23 +149,27 @@ drumscribe-index --update --xlsx --output songs.xlsx
 ### Examples
 
 1. **Create a Markdown file with all songs**:
-```bash
-drumscribe-index --markdown --output drumscribe-songs.md
- ```
+
+    ```bash
+    drumscribe-index --markdown --output drumscribe-songs.md
+    ```
 
 2. **Update your index and export to Excel**:
-```bash
-drumscribe-index --update --xlsx --output songs.xlsx
- ```
+
+    ```bash
+    drumscribe-index --update --xlsx --output songs.xlsx
+    ```
 
 3. **Generate an HTML page**:
-```bash
-drumscribe-index --html --output index.html
-```
+
+    ```bash
+    drumscribe-index --html --output index.html
+    ```
 
 ## Output Structure
 
 The index organizes songs by artist, with each song containing:
+
 - **Artist name**
 - **Song title**
 - **Difficulty level** (Beginner, Intermediate, Advanced, Expert, Master, or
@@ -165,6 +181,7 @@ The index organizes songs by artist, with each song containing:
 
 The program stores cached data in your system's standard application data
 directory:
+
 - **macOS**: `~/Library/Application Support/com.xapphire13.drumscribe-index/`
 - **Linux**: `~/.local/share/drumscribe-index/`
 - **Windows**:
@@ -172,4 +189,5 @@ directory:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
