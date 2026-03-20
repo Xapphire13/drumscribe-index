@@ -1,21 +1,33 @@
 import SwiftUI
 
-private let placeholderGroups: [SongGroup] = [
-    SongGroup(artist: "Foo Fighters", songs: [
-        Song(id: 1, artist: "Foo Fighters", title: "Everlong", difficulty: .advanced, link: "https://example.com/1", sequenceNumber: "1"),
-        Song(id: 2, artist: "Foo Fighters", title: "Best of You", difficulty: .intermediate, link: "https://example.com/2", sequenceNumber: "2"),
-    ]),
-    SongGroup(artist: "John Bonham", songs: [
-        Song(id: 3, artist: "John Bonham", title: "Moby Dick", difficulty: .master, link: "https://example.com/3", sequenceNumber: "3"),
-    ]),
-    SongGroup(artist: "The Police", songs: [
-        Song(id: 4, artist: "The Police", title: "Roxanne", difficulty: .beginner, link: "https://example.com/4", sequenceNumber: "4"),
-    ]),
-]
-
 struct ContentView: View {
+    @StateObject private var loader = SongLoader()
     @State private var searchText = ""
-    @State private var groups: [SongGroup] = placeholderGroups
+
+    var body: some View {
+        Group {
+            switch loader.state {
+            case .loading:
+                ProgressView("Loading songs…")
+                    .frame(minWidth: 600, minHeight: 400)
+            case .loaded(let groups):
+                SongListView(groups: groups, searchText: $searchText)
+            case .failed(let msg):
+                VStack(spacing: 12) {
+                    Text("Failed to load songs: \(msg)")
+                        .foregroundStyle(.secondary)
+                    Button("Retry") { loader.load() }
+                }
+                .frame(minWidth: 600, minHeight: 400)
+            }
+        }
+        .onAppear { loader.load() }
+    }
+}
+
+private struct SongListView: View {
+    let groups: [SongGroup]
+    @Binding var searchText: String
 
     private var filteredGroups: [SongGroup] {
         guard !searchText.isEmpty else { return groups }

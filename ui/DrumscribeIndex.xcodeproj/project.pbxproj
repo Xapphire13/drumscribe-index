@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D0243542F6D27AA00327D41 /* SongLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0243532F6D27AA00327D41 /* SongLoader.swift */; };
 		AA000001 /* DrumscribeIndexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000001 /* DrumscribeIndexApp.swift */; };
 		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000002 /* ContentView.swift */; };
 		AA000003 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000003 /* Models.swift */; };
@@ -14,12 +15,31 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4D0243532F6D27AA00327D41 /* SongLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongLoader.swift; sourceTree = "<group>"; };
 		BB000001 /* DrumscribeIndexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrumscribeIndexApp.swift; sourceTree = "<group>"; };
 		BB000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BB000003 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		BB000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB000005 /* DrumscribeIndex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DrumscribeIndex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		CC000004 /* Build CLI */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build CLI";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME).app/Contents/MacOS/drumscribe-index",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nexport PATH=\"$HOME/.cargo/bin:$PATH\"\ncd \"$SRCROOT/../cli\"\ncargo build --release\ncp target/release/drumscribe-index \"$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/Contents/MacOS/drumscribe-index\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		CC000001 /* Frameworks */ = {
@@ -38,6 +58,7 @@
 				BB000001 /* DrumscribeIndexApp.swift */,
 				BB000002 /* ContentView.swift */,
 				BB000003 /* Models.swift */,
+				4D0243532F6D27AA00327D41 /* SongLoader.swift */,
 				BB000004 /* Assets.xcassets */,
 			);
 			path = DrumscribeIndex;
@@ -66,6 +87,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FF000001 /* Build configuration list for PBXNativeTarget "DrumscribeIndex" */;
 			buildPhases = (
+				CC000004 /* Build CLI */,
 				CC000001 /* Frameworks */,
 				CC000002 /* Sources */,
 				CC000003 /* Resources */,
@@ -87,7 +109,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					EE000001 = {
 						CreatedOnToolsVersion = 16.0;
@@ -129,6 +151,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA000001 /* DrumscribeIndexApp.swift in Sources */,
+				4D0243542F6D27AA00327D41 /* SongLoader.swift in Sources */,
 				AA000002 /* ContentView.swift in Sources */,
 				AA000003 /* Models.swift in Sources */,
 			);
@@ -171,6 +194,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -195,6 +219,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -234,6 +259,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -250,6 +276,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -262,6 +289,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -285,6 +314,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -322,7 +353,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = GG000001 /* Project object */;
 }

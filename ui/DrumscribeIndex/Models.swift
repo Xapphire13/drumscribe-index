@@ -16,18 +16,9 @@ struct Song: Identifiable, Codable {
     let difficulty: Difficulty
     let link: String
     let sequenceNumber: String
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case artist
-        case title
-        case difficulty
-        case link
-        case sequenceNumber = "sequence_number"
-    }
 }
 
-struct SongGroup: Identifiable {
+struct SongGroup: Identifiable, Decodable {
     var id: String { artist }
     let artist: String
     let songs: [Song]
