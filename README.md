@@ -44,7 +44,7 @@ Once Rust is installed, you have two options:
 #### Option 1: Install directly with Cargo (recommended)
 
 ```bash
-cargo install --git https://github.com/Xapphire13/drumscribe-index.git
+cargo install --git https://github.com/Xapphire13/drumscribe-index.git --path cli
 ```
 
 This installs the program directly from the repository to your Cargo bin directory
@@ -56,7 +56,7 @@ This installs the program directly from the repository to your Cargo bin directo
 
     ```bash
     git clone https://github.com/Xapphire13/drumscribe-index.git
-    cd drumscribe-index
+    cd drumscribe-index/cli
     ```
 
 2. **Build the program**:
@@ -71,7 +71,7 @@ This installs the program directly from the repository to your Cargo bin directo
 3. **The compiled program** will be located at:
 
     ```text
-    target/release/drumscribe-index
+    cli/target/release/drumscribe-index
     ```
 
 ## Usage
@@ -81,13 +81,13 @@ This installs the program directly from the repository to your Cargo bin directo
 Run the program to generate a JSON index (printed to your terminal):
 
 ```bash
-cargo run --release
+cd cli && cargo run --release
 ```
 
 Or use the compiled binary directly:
 
 ```bash
-./target/release/drumscribe-index
+./cli/target/release/drumscribe-index
 ```
 
 ### Output Formats
