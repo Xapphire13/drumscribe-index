@@ -158,13 +158,7 @@ struct SongRow: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(song.title)
-                    .font(.body)
-                Text(song.artist)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Text(song.title)
             Spacer()
             DifficultyBadge(difficulty: song.difficulty)
             Link(destination: URL(string: song.link)!) {
