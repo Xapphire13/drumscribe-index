@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject private var loader = SongLoader()
@@ -11,7 +12,7 @@ struct ContentView: View {
                 ProgressView("Loading songs…")
                     .frame(minWidth: 600, minHeight: 400)
             case .loaded(let groups):
-                SongListView(groups: groups, searchText: $searchText)
+                SongListView(groups: groups, searchText: $searchText, loader: loader)
             case .failed(let msg):
                 VStack(spacing: 12) {
                     Text("Failed to load songs: \(msg)")
@@ -28,6 +29,8 @@ struct ContentView: View {
 private struct SongListView: View {
     let groups: [SongGroup]
     @Binding var searchText: String
+    @ObservedObject var loader: SongLoader
+    @State private var exportFeedback: String?
 
     private var filteredGroups: [SongGroup] {
         guard !searchText.isEmpty else { return groups }
@@ -56,10 +59,97 @@ private struct SongListView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            LastUpdatedBar(date: loader.lastUpdated, isUpdating: loader.isUpdating, exportFeedback: exportFeedback)
+        }
         .searchable(text: $searchText, prompt: "Search songs or artists")
         .navigationTitle("Drumscribe Index")
         .navigationSubtitle("\(groups.flatMap(\.songs).count) songs")
         .frame(minWidth: 600, minHeight: 400)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    loader.update()
+                } label: {
+                    Label("Update Index", systemImage: "arrow.clockwise")
+                }
+                .disabled(loader.isUpdating)
+                .help("Fetch new songs from Drumscribe")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    ForEach(ExportFormat.allCases) { format in
+                        Button(format.displayName) {
+                            showExportPanel(format: format)
+                        }
+                    }
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .help("Export the song index")
+            }
+        }
+    }
+
+    private func showExportPanel(format: ExportFormat) {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [contentType(for: format)]
+        panel.nameFieldStringValue = "drumscribe-index.\(format.fileExtension)"
+        panel.isExtensionHidden = false
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            Task {
+                try? await loader.export(format: format, to: url)
+                exportFeedback = url.lastPathComponent
+                try? await Task.sleep(for: .seconds(3))
+                exportFeedback = nil
+            }
+        }
+    }
+
+    private func contentType(for format: ExportFormat) -> UTType {
+        switch format {
+        case .json: .json
+        case .markdown: UTType(filenameExtension: "md") ?? .data
+        case .html: .html
+        case .xlsx: UTType(filenameExtension: "xlsx") ?? .data
+        }
+    }
+}
+
+private struct LastUpdatedBar: View {
+    let date: Date?
+    let isUpdating: Bool
+    let exportFeedback: String?
+
+    private var label: String {
+        guard let date else { return "Never updated" }
+        return "Last updated: \(date.formatted(date: .abbreviated, time: .shortened))"
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack(spacing: 5) {
+                if isUpdating {
+                    ProgressView()
+                        .controlSize(.mini)
+                    Text("Updating…")
+                } else if let exportFeedback {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("Exported \(exportFeedback)")
+                } else {
+                    Text(label)
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 5)
+            .background(.bar)
+        }
     }
 }
 
