@@ -91,13 +91,29 @@ struct DifficultyBadge: View {
     let difficulty: Difficulty
 
     var body: some View {
-        Text(difficulty.rawValue)
-            .font(.caption2)
-            .fontWeight(.medium)
+        if let starCount {
+            HStack(spacing: 2) {
+                ForEach(0..<starCount, id: \.self) { _ in
+                    Image(systemName: "star.fill")
+                        .font(.caption2)
+                }
+            }
+            .foregroundStyle(color)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(color.opacity(0.15), in: Capsule())
-            .foregroundStyle(color)
+        }
+    }
+
+    private var starCount: Int? {
+        switch difficulty {
+        case .beginner: 1
+        case .intermediate: 2
+        case .advanced: 3
+        case .expert: 4
+        case .master: 5
+        case .unrated: nil
+        }
     }
 
     private var color: Color {
