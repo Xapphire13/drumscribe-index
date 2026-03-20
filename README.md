@@ -75,18 +75,18 @@ This installs the program directly from the repository to your Cargo bin directo
 ## macOS App
 
 A native SwiftUI app lives in `ui/`. It requires macOS 14 (Sonoma) or later and
-Swift 5.9+, which ship with Xcode 15+.
+Xcode 15+.
 
-**Open in Xcode** (recommended — enables SwiftUI previews):
+**Open in Xcode**:
 
 ```bash
-open ui/Package.swift
+open ui/DrumscribeIndex.xcodeproj
 ```
 
 **Build from the command line**:
 
 ```bash
-cd ui && swift build
+cd ui && xcodebuild -scheme DrumscribeIndex build
 ```
 
 ## Usage
