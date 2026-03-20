@@ -12,7 +12,12 @@ struct DrumscribeIndexApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .undoRedo) {}
-            CommandGroup(replacing: .pasteboard) {}
+            CommandGroup(replacing: .pasteboard) {
+                Button("Select All") {
+                    NSApp.sendAction(#selector(NSResponder.selectAll(_:)), to: nil, from: nil)
+                }
+                .keyboardShortcut("a")
+            }
             CommandGroup(replacing: .windowList) {}
             CommandGroup(replacing: .windowArrangement) {}
         }
