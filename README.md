@@ -1,16 +1,14 @@
 # Drumscribe Index
 
-A command-line tool that fetches and generates an index of drum transcription
-songs from Drumscribe. It retrieves drum transcription posts and generates a
-searchable index with artist, title, difficulty level, and links to full
-transcriptions. The tool caches results locally for faster subsequent runs and
-supports incremental updates, with output available in JSON, Markdown, HTML, and
-XLSX formats.
+A tool for browsing and exporting the Drumscribe drum transcription catalog.
+It fetches transcription posts, caches them locally, and makes the index
+available via a CLI (JSON, Markdown, HTML, XLSX output) and a native macOS app.
 
 ## Features
 
 - Fetches drum transcription data from the Drumscribe BuyMeACoffee page
 - Generates indexes in multiple formats: JSON, Markdown, HTML, and Excel (XLSX)
+- Native macOS app with a searchable, artist-grouped song list
 - Local caching for improved performance
 - Incremental updates to keep your index current
 - Organizes songs by artist with difficulty ratings
@@ -73,6 +71,23 @@ This installs the program directly from the repository to your Cargo bin directo
     ```text
     cli/target/release/drumscribe-index
     ```
+
+## macOS App
+
+A native SwiftUI app lives in `ui/`. It requires macOS 14 (Sonoma) or later and
+Swift 5.9+, which ship with Xcode 15+.
+
+**Open in Xcode** (recommended — enables SwiftUI previews):
+
+```bash
+open ui/Package.swift
+```
+
+**Build from the command line**:
+
+```bash
+cd ui && swift build
+```
 
 ## Usage
 
