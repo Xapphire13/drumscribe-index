@@ -18,7 +18,8 @@ use crate::{
     index_cache::IndexCache,
     models::song::{Song, SongGroup},
     output::{
-        html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter, xlsx::XlsxFormatter,
+        html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
+        pdf::PdfFormatter, xlsx::XlsxFormatter,
     },
 };
 
@@ -49,6 +50,10 @@ struct Cli {
     /// Output in XLSX format to the specified file path
     #[arg(long, group = "format", requires = "output")]
     xlsx: bool,
+
+    /// Output in PDF format to the specified file path
+    #[arg(long, group = "format", requires = "output")]
+    pdf: bool,
 
     /// Saves output to specified file path
     #[arg(long, value_name = "PATH")]
@@ -164,6 +169,11 @@ async fn main() -> Result<()> {
         // XLSX format writes to a file instead of returning text-based result
         XlsxFormatter::format_to_file(&index_cache.songs, &output_path)?;
         println!("XLSX file saved to: {output_path}");
+    } else if cli.pdf
+        && let Some(output_path) = cli.output
+    {
+        PdfFormatter::format_to_file(&index_cache.songs, index_cache.last_indexed, &output_path)?;
+        println!("PDF file saved to: {output_path}");
     } else {
         let file_type;
 
