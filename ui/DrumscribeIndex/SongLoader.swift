@@ -1,10 +1,11 @@
 import Foundation
 
 enum ExportFormat: String, CaseIterable, Identifiable {
-    case json, markdown, html, xlsx
+    case pdf, xlsx, html, markdown, json
     var id: String { rawValue }
     var cliFlag: String {
         switch self {
+        case .pdf: "--pdf"
         case .json: "--json"
         case .markdown: "--markdown"
         case .html: "--html"
@@ -13,6 +14,7 @@ enum ExportFormat: String, CaseIterable, Identifiable {
     }
     var fileExtension: String {
         switch self {
+        case .pdf: "pdf"
         case .json: "json"
         case .markdown: "md"
         case .html: "html"
@@ -21,6 +23,7 @@ enum ExportFormat: String, CaseIterable, Identifiable {
     }
     var displayName: String {
         switch self {
+        case .pdf: "PDF"
         case .json: "JSON"
         case .markdown: "Markdown"
         case .html: "HTML"

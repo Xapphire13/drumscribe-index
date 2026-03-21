@@ -161,6 +161,7 @@ private struct SongListView: View {
 
     private func contentType(for format: ExportFormat) -> UTType {
         switch format {
+        case .pdf: .pdf
         case .json: .json
         case .markdown: UTType(filenameExtension: "md") ?? .data
         case .html: .html

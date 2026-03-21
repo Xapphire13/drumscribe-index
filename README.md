@@ -89,6 +89,29 @@ open ui/DrumscribeIndex.xcodeproj
 cd ui && xcodebuild -scheme DrumscribeIndex build
 ```
 
+### Building a DMG for Distribution
+
+1. **Export the app from Xcode**: `Product > Archive`, then in the Organizer
+   select the archive and click **Distribute App > Direct Distribution**.
+   Xcode will produce a `DrumscribeIndex.app`.
+
+2. **Install `create-dmg`** (one-time):
+
+    ```bash
+    brew install create-dmg
+    ```
+
+3. **Run the DMG script**:
+
+    ```bash
+    ./scripts/make-dmg.sh /path/to/DrumscribeIndex.app
+    ```
+
+   This creates `DrumscribeIndex.dmg` in the same directory as the `.app`.
+
+> **Note:** The app is unsigned, so recipients will need to right-click > Open
+> on first launch, or allow it in System Settings > Privacy & Security.
+
 ## Usage
 
 ### Basic Usage
