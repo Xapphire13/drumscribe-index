@@ -163,9 +163,11 @@ struct SongRow: View {
             DifficultyBadge(difficulty: song.difficulty)
             Link(destination: URL(string: song.link)!) {
                 Image(systemName: "arrow.up.right.square")
-                    .foregroundStyle(.secondary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
+            .onHover { inside in
+                if inside { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+            }
         }
         .padding(.vertical, 2)
     }
