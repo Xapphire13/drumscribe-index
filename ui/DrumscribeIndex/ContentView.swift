@@ -31,21 +31,44 @@ private struct SongListView: View {
     @Binding var searchText: String
     @ObservedObject var loader: SongLoader
     @State private var exportFeedback: String?
+    @State private var selectedDifficulties: Set<Difficulty> = []
 
     private var filteredGroups: [SongGroup] {
-        guard !searchText.isEmpty else { return groups }
-        return groups.compactMap { group in
-            let matchingArtist = group.artist.localizedCaseInsensitiveContains(searchText)
-            let matchingSongs = group.songs.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.artist.localizedCaseInsensitiveContains(searchText)
+        var result = groups
+
+        if !searchText.isEmpty {
+            result = result.compactMap { group in
+                let matchingArtist = group.artist.localizedCaseInsensitiveContains(searchText)
+                let matchingSongs = group.songs.filter {
+                    $0.title.localizedCaseInsensitiveContains(searchText) ||
+                    $0.artist.localizedCaseInsensitiveContains(searchText)
+                }
+                if matchingArtist {
+                    return group
+                } else if !matchingSongs.isEmpty {
+                    return SongGroup(artist: group.artist, songs: matchingSongs)
+                }
+                return nil
             }
-            if matchingArtist {
-                return group
-            } else if !matchingSongs.isEmpty {
-                return SongGroup(artist: group.artist, songs: matchingSongs)
+        }
+
+        if !selectedDifficulties.isEmpty {
+            result = result.compactMap { group in
+                let matching = group.songs.filter { selectedDifficulties.contains($0.difficulty) }
+                return matching.isEmpty ? nil : SongGroup(artist: group.artist, songs: matching)
             }
-            return nil
+        }
+
+        return result
+    }
+
+    private var subtitleText: String {
+        let filtered = filteredGroups.flatMap(\.songs).count
+        let total = groups.flatMap(\.songs).count
+        if filtered == total {
+            return "\(total) songs"
+        } else {
+            return "\(filtered) of \(total) songs"
         }
     }
 
@@ -64,7 +87,7 @@ private struct SongListView: View {
         }
         .searchable(text: $searchText, prompt: "Search songs or artists")
         .navigationTitle("Drumscribe Index")
-        .navigationSubtitle("\(groups.flatMap(\.songs).count) songs")
+        .navigationSubtitle(subtitleText)
         .frame(minWidth: 600, minHeight: 400)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -88,6 +111,34 @@ private struct SongListView: View {
                     Label("Export", systemImage: "square.and.arrow.up")
                 }
                 .help("Export the song index")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        selectedDifficulties = []
+                    } label: {
+                        Label("All Difficulties", systemImage: selectedDifficulties.isEmpty ? "checkmark" : "")
+                    }
+                    Divider()
+                    ForEach(Difficulty.allCases, id: \.self) { difficulty in
+                        Button {
+                            if selectedDifficulties.contains(difficulty) {
+                                selectedDifficulties.remove(difficulty)
+                            } else {
+                                selectedDifficulties.insert(difficulty)
+                            }
+                        } label: {
+                            Label(difficulty.rawValue, systemImage: selectedDifficulties.contains(difficulty) ? "checkmark" : "")
+                        }
+                    }
+                } label: {
+                    Label(
+                        "Filter",
+                        systemImage: selectedDifficulties.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill"
+                    )
+                }
+                .help("Filter by difficulty")
             }
         }
     }
