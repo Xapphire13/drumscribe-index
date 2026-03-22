@@ -30,10 +30,12 @@ private struct SongListView: View {
     let groups: [SongGroup]
     @Binding var searchText: String
     @ObservedObject var loader: SongLoader
+    @EnvironmentObject var favoritesStore: FavoritesStore
     @State private var exportFeedback: String?
     @State private var selectedDifficulties: Set<Difficulty> = []
     @State private var sortOption: SortOption = .titleAZ
     @State private var isGrouped: Bool = true
+    @State private var showOnlyFavorites: Bool = false
 
     private func sortedSongs(_ songs: [Song]) -> [Song] {
         songs.sorted { a, b in
@@ -62,6 +64,9 @@ private struct SongListView: View {
         }
         if !selectedDifficulties.isEmpty {
             result = result.filter { selectedDifficulties.contains($0.difficulty) }
+        }
+        if showOnlyFavorites {
+            result = result.filter { favoritesStore.contains(id: $0.id) }
         }
         return result
     }
@@ -114,25 +119,11 @@ private struct SongListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    loader.update()
+                    showOnlyFavorites.toggle()
                 } label: {
-                    Label("Update Index", systemImage: "arrow.clockwise")
+                    Label("Favorites", systemImage: showOnlyFavorites ? "heart.fill" : "heart")
                 }
-                .disabled(loader.isUpdating)
-                .help("Fetch new songs from Drumscribe")
-            }
-
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    ForEach(ExportFormat.allCases) { format in
-                        Button(format.displayName) {
-                            showExportPanel(format: format)
-                        }
-                    }
-                } label: {
-                    Label("Export", systemImage: "square.and.arrow.up")
-                }
-                .help("Export the song index")
+                .help("Show only favorites")
             }
 
             ToolbarItem(placement: .primaryAction) {
@@ -182,6 +173,29 @@ private struct SongListView: View {
                     )
                 }
                 .help("Filter by difficulty")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    ForEach(ExportFormat.allCases) { format in
+                        Button(format.displayName) {
+                            showExportPanel(format: format)
+                        }
+                    }
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .help("Export the song index")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    loader.update()
+                } label: {
+                    Label("Update Index", systemImage: "arrow.clockwise")
+                }
+                .disabled(loader.isUpdating)
+                .help("Fetch new songs from Drumscribe")
             }
         }
     }
@@ -251,6 +265,7 @@ private struct LastUpdatedBar: View {
 struct SongRow: View {
     let song: Song
     var showArtist: Bool = false
+    @EnvironmentObject var favoritesStore: FavoritesStore
 
     var body: some View {
         HStack {
@@ -264,6 +279,16 @@ struct SongRow: View {
             }
             Spacer()
             DifficultyBadge(difficulty: song.difficulty)
+            Button {
+                favoritesStore.toggle(id: song.id)
+            } label: {
+                Image(systemName: favoritesStore.contains(id: song.id) ? "heart.fill" : "heart")
+                    .foregroundStyle(favoritesStore.contains(id: song.id) ? .red : .secondary)
+            }
+            .buttonStyle(.borderless)
+            .onHover { inside in
+                if inside { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+            }
             Link(destination: URL(string: song.link)!) {
                 Image(systemName: "arrow.up.right.square")
             }

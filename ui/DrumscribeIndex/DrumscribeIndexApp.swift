@@ -2,9 +2,12 @@ import SwiftUI
 
 @main
 struct DrumscribeIndexApp: App {
+    @StateObject private var favoritesStore = FavoritesStore()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(favoritesStore)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
