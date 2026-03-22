@@ -32,38 +32,53 @@ private struct SongListView: View {
     @ObservedObject var loader: SongLoader
     @State private var exportFeedback: String?
     @State private var selectedDifficulties: Set<Difficulty> = []
+    @State private var sortOption: SortOption = .titleAZ
+    @State private var isGrouped: Bool = true
 
-    private var filteredGroups: [SongGroup] {
-        var result = groups
+    private func sortedSongs(_ songs: [Song]) -> [Song] {
+        songs.sorted { a, b in
+            switch sortOption {
+            case .titleAZ:
+                return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+            case .recentlyAdded:
+                return (Double(a.sequenceNumber) ?? 0) > (Double(b.sequenceNumber) ?? 0)
+            case .difficultyAsc:
+                return a.difficulty.sortOrder < b.difficulty.sortOrder
+            case .difficultyDesc:
+                if a.difficulty == .unrated { return false }
+                if b.difficulty == .unrated { return true }
+                return a.difficulty.sortOrder > b.difficulty.sortOrder
+            }
+        }
+    }
 
+    private var filteredSongs: [Song] {
+        var result = groups.flatMap(\.songs)
         if !searchText.isEmpty {
-            result = result.compactMap { group in
-                let matchingArtist = group.artist.localizedCaseInsensitiveContains(searchText)
-                let matchingSongs = group.songs.filter {
-                    $0.title.localizedCaseInsensitiveContains(searchText) ||
-                    $0.artist.localizedCaseInsensitiveContains(searchText)
-                }
-                if matchingArtist {
-                    return group
-                } else if !matchingSongs.isEmpty {
-                    return SongGroup(artist: group.artist, songs: matchingSongs)
-                }
-                return nil
+            result = result.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.artist.localizedCaseInsensitiveContains(searchText)
             }
         }
-
         if !selectedDifficulties.isEmpty {
-            result = result.compactMap { group in
-                let matching = group.songs.filter { selectedDifficulties.contains($0.difficulty) }
-                return matching.isEmpty ? nil : SongGroup(artist: group.artist, songs: matching)
-            }
+            result = result.filter { selectedDifficulties.contains($0.difficulty) }
         }
-
         return result
     }
 
+    private var displayGroups: [SongGroup] {
+        let byArtist = Dictionary(grouping: filteredSongs, by: \.artist)
+        return byArtist
+            .map { SongGroup(artist: $0.key, songs: sortedSongs($0.value)) }
+            .sorted { $0.artist < $1.artist }
+    }
+
+    private var displaySongs: [Song] {
+        sortedSongs(filteredSongs)
+    }
+
     private var subtitleText: String {
-        let filtered = filteredGroups.flatMap(\.songs).count
+        let filtered = filteredSongs.count
         let total = groups.flatMap(\.songs).count
         if filtered == total {
             return "\(total) songs"
@@ -74,14 +89,21 @@ private struct SongListView: View {
 
     var body: some View {
         List {
-            ForEach(filteredGroups) { group in
-                Section(group.artist) {
-                    ForEach(group.songs) { song in
-                        SongRow(song: song)
+            if isGrouped {
+                ForEach(displayGroups) { group in
+                    Section(group.artist) {
+                        ForEach(group.songs) { song in
+                            SongRow(song: song)
+                        }
                     }
+                }
+            } else {
+                ForEach(displaySongs) { song in
+                    SongRow(song: song, showArtist: true)
                 }
             }
         }
+        .id("\(sortOption)-\(isGrouped)")
         .safeAreaInset(edge: .bottom, spacing: 0) {
             LastUpdatedBar(date: loader.lastUpdated, isUpdating: loader.isUpdating, exportFeedback: exportFeedback)
         }
@@ -111,6 +133,27 @@ private struct SongListView: View {
                     Label("Export", systemImage: "square.and.arrow.up")
                 }
                 .help("Export the song index")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    ForEach(SortOption.allCases, id: \.self) { option in
+                        Button {
+                            sortOption = option
+                        } label: {
+                            Label(option.displayName, systemImage: sortOption == option ? "checkmark" : "")
+                        }
+                    }
+                    Divider()
+                    Button {
+                        isGrouped.toggle()
+                    } label: {
+                        Label("Group by Artist", systemImage: isGrouped ? "checkmark" : "")
+                    }
+                } label: {
+                    Label("Sort", systemImage: "arrow.up.arrow.down")
+                }
+                .help("Sort songs")
             }
 
             ToolbarItem(placement: .primaryAction) {
@@ -207,10 +250,18 @@ private struct LastUpdatedBar: View {
 
 struct SongRow: View {
     let song: Song
+    var showArtist: Bool = false
 
     var body: some View {
         HStack {
-            Text(song.title)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(song.title)
+                if showArtist {
+                    Text(song.artist)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             Spacer()
             DifficultyBadge(difficulty: song.difficulty)
             Link(destination: URL(string: song.link)!) {

@@ -7,6 +7,33 @@ enum Difficulty: String, Codable, CaseIterable {
     case expert = "Expert"
     case master = "Master"
     case unrated = "Unrated"
+
+    var sortOrder: Int {
+        switch self {
+        case .beginner:     1
+        case .intermediate: 2
+        case .advanced:     3
+        case .expert:       4
+        case .master:       5
+        case .unrated:      6
+        }
+    }
+}
+
+enum SortOption: CaseIterable {
+    case titleAZ
+    case recentlyAdded
+    case difficultyAsc
+    case difficultyDesc
+
+    var displayName: String {
+        switch self {
+        case .titleAZ:        "Title A–Z"
+        case .recentlyAdded:  "Recently Added"
+        case .difficultyAsc:  "Difficulty: Easy → Hard"
+        case .difficultyDesc: "Difficulty: Hard → Easy"
+        }
+    }
 }
 
 struct Song: Identifiable, Codable {
