@@ -21,6 +21,20 @@ struct DrumscribeIndexApp: App {
                 }
                 .keyboardShortcut("a")
             }
+            CommandGroup(replacing: .textFormatting) {
+                Button("Find...") {
+                    guard let window = NSApp.keyWindow else { return }
+                    func findSearchField(in view: NSView) -> NSSearchField? {
+                        if let field = view as? NSSearchField { return field }
+                        return view.subviews.lazy.compactMap { findSearchField(in: $0) }.first
+                    }
+                    let root = window.contentView?.superview ?? window.contentView
+                    if let field = root.flatMap({ findSearchField(in: $0) }) {
+                        window.makeFirstResponder(field)
+                    }
+                }
+                .keyboardShortcut("f")
+            }
             CommandGroup(replacing: .windowList) {}
             CommandGroup(replacing: .windowArrangement) {}
         }
