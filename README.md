@@ -1,95 +1,99 @@
 # Drumscribe Index
 
-A tool for browsing and exporting the Drumscribe drum transcription catalog.
-It fetches transcription posts, caches them locally, and makes the index
-available via a CLI (JSON, Markdown, HTML, XLSX output) and a native macOS app.
+A tool for browsing and exporting the
+[Drumscribe](https://buymeacoffee.com/drumscribe) drum transcription catalog. It
+fetches transcription posts, caches them locally, and makes the index available
+via a CLI (JSON, Markdown, HTML, XLSX, PDF output) and an optional native macOS
+app.
 
-## Features
+## Prerequisites
 
-- Fetches drum transcription data from the Drumscribe BuyMeACoffee page
-- Generates indexes in multiple formats: JSON, Markdown, HTML, and Excel (XLSX)
-- Native macOS app with a searchable, artist-grouped song list
-- Local caching for improved performance
-- Incremental updates to keep your index current
-- Organizes songs by artist with difficulty ratings
-- Supports output to files or standard output
+**Rust** is required for both the CLI and the macOS app (the Xcode build
+invokes Cargo internally):
 
-## Installation
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
-### Prerequisites
+Visit [rustup.rs](https://rustup.rs) for platform-specific instructions.
 
-You'll need to install Rust on your system. Don't worry if you haven't used Rust
-before - the installation is straightforward:
+**Xcode 15+ and macOS 14 (Sonoma) or later** — required only if you want the
+macOS app.
 
-1. **Install Rust**: Visit [https://rustup.rs](https://rustup.rs) and follow the
-   instructions for your operating system.
+## CLI
 
-   - On macOS/Linux, run: `curl --proto '=https' --tlsv1.2 -sSf
-     https://sh.rustup.rs | sh`
+### Install
 
-   - On Windows, download and run the installer from the website. _(Note: you need
-     to install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-     prior)_
-
-2. **Verify the installation**: After installation, close and reopen your
-   terminal, then run: `cargo --version` You should see the Cargo
-   version number displayed.
-
-### Installing Drumscribe Index
-
-Once Rust is installed, you have two options:
-
-#### Option 1: Install directly with Cargo (recommended)
+#### Option 1: Install with Cargo (recommended)
 
 ```bash
 cargo install --git https://github.com/Xapphire13/drumscribe-index.git --path cli
 ```
 
-This installs the program directly from the repository to your Cargo bin directory
-(usually `~/.cargo/bin/`), making it available system-wide as `drumscribe-index`.
+Installs `drumscribe-index` to your Cargo bin directory (`~/.cargo/bin/`),
+making it available system-wide.
 
 #### Option 2: Build from source
 
-1. **Clone this repository**:
+```bash
+git clone https://github.com/Xapphire13/drumscribe-index.git
+cd drumscribe-index/cli
+cargo build --release
+```
 
-    ```bash
-    git clone https://github.com/Xapphire13/drumscribe-index.git
-    cd drumscribe-index/cli
-    ```
+The compiled binary will be at `cli/target/release/drumscribe-index`.
 
-2. **Build the program**:
+### Usage
 
-    ```bash
-    cargo build --release
-    ```
+On first run, the program fetches all available songs and caches them locally.
+Subsequent runs use the cache. Use `--update` to fetch new songs:
 
-   This will compile the program. The first build may take a few minutes as it
-   downloads and compiles dependencies.
+```bash
+drumscribe-index --update
+```
 
-3. **The compiled program** will be located at:
+#### Output formats
 
-    ```text
-    cli/target/release/drumscribe-index
-    ```
+| Flag | Output | Notes |
+|------|--------|-------|
+| _(none / `--json`)_ | JSON | Default |
+| `--markdown` | Markdown | |
+| `--html` | HTML | |
+| `--xlsx` | Excel | Requires `--output` |
+| `--pdf` | PDF | Requires `--output` |
 
-## macOS App
+Use `--output <file>` to save to a file instead of stdout:
 
-A native SwiftUI app lives in `ui/`. It requires macOS 14 (Sonoma) or later and
-Xcode 15+.
+```bash
+drumscribe-index --markdown --output index.md
+drumscribe-index --html --output index.html
+drumscribe-index --json --output songs.json
+drumscribe-index --xlsx --output songs.xlsx
+drumscribe-index --pdf --output songs.pdf
+drumscribe-index --update --xlsx --output songs.xlsx
+```
 
-**Open in Xcode**:
+## macOS App (optional)
+
+The native SwiftUI app lives in `ui/`. It is **optional** — the CLI works
+independently without it. Building the app also builds and bundles the CLI, so
+you do not need a separate CLI install if you are using the app.
+
+### Build
+
+Open in Xcode:
 
 ```bash
 open ui/DrumscribeIndex.xcodeproj
 ```
 
-**Build from the command line**:
+Or build from the command line:
 
 ```bash
 cd ui && xcodebuild -scheme DrumscribeIndex build
 ```
 
-### Building a DMG for Distribution
+### Distribution (DMG)
 
 1. **Export the app from Xcode**: `Product > Archive`, then in the Organizer
    select the archive and click **Distribute App > Direct Distribution**.
@@ -111,98 +115,6 @@ cd ui && xcodebuild -scheme DrumscribeIndex build
 
 > **Note:** The app is unsigned, so recipients will need to right-click > Open
 > on first launch, or allow it in System Settings > Privacy & Security.
-
-## Usage
-
-### Basic Usage
-
-Run the program to generate a JSON index (printed to your terminal):
-
-```bash
-cd cli && cargo run --release
-```
-
-Or use the compiled binary directly:
-
-```bash
-./cli/target/release/drumscribe-index
-```
-
-### Output Formats
-
-Choose your preferred output format using command-line flags:
-
-**JSON (default)**:
-
-```bash
-drumscribe-index --json 
-```
-
-**Markdown**:
-
-```bash
-drumscribe-index --markdown 
-```
-
-**HTML**:
-
-```bash
-drumscribe-index --html
-```
-
-**Excel (XLSX)**: Requires specifying an output file
-
-```bash
-drumscribe-index --xlsx --output songs.xlsx
-```
-
-### Saving to a File
-
-Use the `--output` flag to save results to a file:
-
-```bash
-drumscribe-index --markdown --output index.md
-drumscribe-index --html --output index.html
-drumscribe-index --json --output songs.json
-```
-
-### Updating the Index
-
-The first time you run the program, it will fetch all available songs and cache
-them locally. On subsequent runs, it uses the cached data for faster
-performance.
-
-To update your index with new songs published since your last run:
-
-```bash
-drumscribe-index --update
-```
-
-You can combine `--update` with any output format:
-
-```bash
-drumscribe-index --update --xlsx --output songs.xlsx
-```
-
-### Examples
-
-1. **Create a Markdown file with all songs**:
-
-    ```bash
-    drumscribe-index --markdown --output drumscribe-songs.md
-    ```
-
-2. **Update your index and export to Excel**:
-
-    ```bash
-    drumscribe-index --update --xlsx --output songs.xlsx
-    ```
-
-3. **Generate an HTML page**:
-
-    ```bash
-    drumscribe-index --html --output index.html
-    ```
 
 ## Output Structure
 
