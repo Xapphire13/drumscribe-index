@@ -79,7 +79,33 @@ The native SwiftUI app lives in `ui/`. It is **optional** — the CLI works
 independently without it. Building the app also builds and bundles the CLI, so
 you do not need a separate CLI install if you are using the app.
 
-### Build
+### Install
+
+Paste this into Terminal — it downloads the latest release, verifies the
+checksum, and installs DrumscribeIndex to `/Applications`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash
+```
+
+To also install the `drumscribe-index` CLI binary to `/usr/local/bin`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash -s -- --cli
+```
+
+To install only the CLI (no GUI app):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash -s -- --cli-only
+```
+
+Use `--cli-dir <path>` to install the CLI to a custom directory (e.g.
+`--cli-dir ~/.local/bin` if `/usr/local/bin` requires `sudo`).
+
+To update, run the same command again.
+
+### Build from source
 
 Open in Xcode:
 
@@ -93,7 +119,7 @@ Or build from the command line:
 cd ui && xcodebuild -scheme DrumscribeIndex build
 ```
 
-### Distribution (DMG)
+### Creating a Release
 
 1. **Export the app from Xcode**: `Product > Archive`, then in the Organizer
    select the archive and click **Distribute App > Direct Distribution**.
@@ -113,8 +139,25 @@ cd ui && xcodebuild -scheme DrumscribeIndex build
 
    This creates `DrumscribeIndex.dmg` in the same directory as the `.app`.
 
-> **Note:** The app is unsigned, so recipients will need to right-click > Open
-> on first launch, or allow it in System Settings > Privacy & Security.
+4. **Generate a checksum**:
+
+    ```bash
+    shasum -a 256 DrumscribeIndex.dmg > DrumscribeIndex.dmg.sha256
+    ```
+
+5. **Build the CLI binaries** (run from the repo root; requires both macOS
+   cross-compilation targets to be installed):
+
+    ```bash
+    ./scripts/make-cli-release.sh --output-dir /path/to/release-dir
+    ```
+
+   This produces four files: `drumscribe-index-aarch64-apple-darwin.gz`,
+   `drumscribe-index-x86_64-apple-darwin.gz`, and their `.sha256` counterparts.
+
+6. **Create a GitHub release** and upload all 6 assets:
+   `DrumscribeIndex.dmg`, `DrumscribeIndex.dmg.sha256`, and the 4 files from
+   the previous step.
 
 ## Output Structure
 
