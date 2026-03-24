@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject private var loader = SongLoader()
+    @EnvironmentObject private var updateChecker: UpdateChecker
     @State private var searchText = ""
 
     var body: some View {
@@ -22,7 +23,47 @@ struct ContentView: View {
                 .frame(minWidth: 600, minHeight: 400)
             }
         }
-        .onAppear { loader.load() }
+        .overlay(alignment: .bottom) {
+            if let update = updateChecker.availableUpdate, !updateChecker.isDismissed {
+                UpdatePill(update: update, checker: updateChecker)
+                    .padding(.bottom, 36)
+            }
+        }
+        .animation(.spring, value: updateChecker.isDismissed)
+        .onAppear {
+            loader.load()
+            Task { await updateChecker.checkOnStartup() }
+        }
+    }
+}
+
+private struct UpdatePill: View {
+    let update: UpdateChecker.UpdateInfo
+    let checker: UpdateChecker
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.down.circle")
+            Text("v\(update.version) available")
+                .fontWeight(.medium)
+            Button("Install") {
+                checker.installUpdate()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            Button {
+                checker.dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .imageScale(.small)
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 

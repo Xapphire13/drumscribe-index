@@ -3,11 +3,13 @@ import SwiftUI
 @main
 struct DrumscribeIndexApp: App {
     @StateObject private var favoritesStore = FavoritesStore()
+    @StateObject private var updateChecker = UpdateChecker()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(favoritesStore)
+                .environmentObject(updateChecker)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
@@ -37,6 +39,12 @@ struct DrumscribeIndexApp: App {
             }
             CommandGroup(replacing: .windowList) {}
             CommandGroup(replacing: .windowArrangement) {}
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    Task { await updateChecker.check() }
+                }
+                .disabled(updateChecker.isChecking)
+            }
         }
     }
 
