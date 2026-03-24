@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="Xapphire13/drumscribe-index"
-APP_NAME="DrumscribeIndex"
+APP_NAME="Drumscribe Index"
 CLI_BINARY_NAME="drumscribe-index"
 APP_INSTALL_DIR="/Applications"
 

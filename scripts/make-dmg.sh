@@ -2,7 +2,7 @@
 set -e
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <path/to/DrumscribeIndex.app>"
+  echo "Usage: $0 <path/to/Drumscribe Index.app>"
   exit 1
 fi
 

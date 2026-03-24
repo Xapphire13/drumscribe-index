@@ -82,7 +82,7 @@ you do not need a separate CLI install if you are using the app.
 ### Install
 
 Paste this into Terminal — it downloads the latest release, verifies the
-checksum, and installs DrumscribeIndex to `/Applications`:
+checksum, and installs `Drumscribe Index` to `/Applications`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash
@@ -136,7 +136,7 @@ Before releasing, bump the version with `scripts/bump.sh`:
 
 1. **Export the app from Xcode**: `Product > Archive`, then in the Organizer
    select the archive and click **Distribute App > Direct Distribution**.
-   Xcode will produce a `DrumscribeIndex.app`.
+   Xcode will produce a `Drumscribe Index.app`.
 
 2. **Install `create-dmg`** (one-time):
 
@@ -147,15 +147,15 @@ Before releasing, bump the version with `scripts/bump.sh`:
 3. **Run the DMG script**:
 
     ```bash
-    ./scripts/make-dmg.sh /path/to/DrumscribeIndex.app
+    ./scripts/make-dmg.sh "/path/to/Drumscribe Index.app"
     ```
 
-   This creates `DrumscribeIndex.dmg` in the same directory as the `.app`.
+   This creates `Drumscribe Index.dmg` in the same directory as the `.app`.
 
 4. **Generate a checksum**:
 
     ```bash
-    shasum -a 256 DrumscribeIndex.dmg > DrumscribeIndex.dmg.sha256
+    shasum -a 256 "Drumscribe Index.dmg" > "Drumscribe Index.dmg.sha256"
     ```
 
 5. **Build the CLI binaries** (run from the repo root; requires both macOS
@@ -169,7 +169,7 @@ Before releasing, bump the version with `scripts/bump.sh`:
    `drumscribe-index-x86_64-apple-darwin.gz`, and their `.sha256` counterparts.
 
 6. **Create a GitHub release** and upload all 6 assets:
-   `DrumscribeIndex.dmg`, `DrumscribeIndex.dmg.sha256`, and the 4 files from
+   `Drumscribe Index.dmg`, `Drumscribe Index.dmg.sha256`, and the 4 files from
    the previous step.
 
 ## Output Structure
