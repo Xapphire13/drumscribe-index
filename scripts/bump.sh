@@ -86,6 +86,9 @@ if [[ "$MODE" == "cli" ]]; then
   update_ui_version "$new_ui"
   new_build="$(update_build_number)"
 
+  git tag -a "cli/v$new_cli" -m "cli v$new_cli"
+  git tag -a "ui/v$new_ui" -m "ui v$new_ui"
+
   echo "CLI: $old_cli → $new_cli"
   echo "UI:  $old_cli → $new_ui (build $new_build)"
 else
@@ -94,6 +97,8 @@ else
 
   update_ui_version "$new_ui"
   new_build="$(update_build_number)"
+
+  git tag -a "ui/v$new_ui" -m "ui v$new_ui"
 
   echo "UI: $old_ui → $new_ui (build $new_build)"
 fi
