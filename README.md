@@ -121,6 +121,19 @@ cd ui && xcodebuild -scheme DrumscribeIndex build
 
 ### Creating a Release
 
+Before releasing, bump the version with `scripts/bump.sh`:
+
+```bash
+# UI-only change (bug fix)
+./scripts/bump.sh --ui patch
+
+# UI-only change (new feature)
+./scripts/bump.sh --ui minor
+
+# CLI change (always bumps both CLI and UI)
+./scripts/bump.sh --cli minor
+```
+
 1. **Export the app from Xcode**: `Product > Archive`, then in the Organizer
    select the archive and click **Distribute App > Direct Distribution**.
    Xcode will produce a `DrumscribeIndex.app`.
