@@ -12,6 +12,7 @@ WAIT_PID=""
 INSTALL_CLI=false
 CLI_ONLY=false
 CLI_DIR="/usr/local/bin"
+OPEN_APP=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -32,9 +33,13 @@ while [[ $# -gt 0 ]]; do
       CLI_DIR="$2"
       shift 2
       ;;
+    --open)
+      OPEN_APP=true
+      shift
+      ;;
     *)
       echo "Unknown argument: $1" >&2
-      echo "Usage: $0 [--wait-pid <pid>] [--cli] [--cli-only] [--cli-dir <dir>]" >&2
+      echo "Usage: $0 [--wait-pid <pid>] [--cli] [--cli-only] [--cli-dir <dir>] [--open]" >&2
       exit 1
       ;;
   esac
@@ -118,6 +123,10 @@ if [[ "$CLI_ONLY" != true ]]; then
   cp -R "$TMP_DIR/mount/${APP_NAME}.app" "${APP_INSTALL_DIR}/"
 
   echo "${APP_NAME} installed successfully."
+
+  if [[ "$OPEN_APP" == true ]]; then
+    open "${APP_INSTALL_DIR}/${APP_NAME}.app"
+  fi
 fi
 
 # --- Install CLI binary (if --cli or --cli-only) ---
