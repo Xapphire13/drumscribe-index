@@ -8,8 +8,8 @@ app.
 
 ## Prerequisites
 
-**Rust** is required for both the CLI and the macOS app (the Xcode build
-invokes Cargo internally):
+**Rust** — required only if you install via Cargo or build from source (not
+needed for the pre-built binary install):
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -24,7 +24,20 @@ macOS app.
 
 ### Install
 
-#### Option 1: Install with Cargo (recommended)
+#### Option 1: Pre-built binary (recommended)
+
+Paste this into Terminal — it downloads the latest release, verifies the
+checksum, and installs `drumscribe-index` to `/usr/local/bin`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash -s -- --cli-only
+```
+
+Use `--cli-dir <path>` to install to a custom directory (e.g.
+`--cli-dir ~/.local/bin` if `/usr/local/bin` requires `sudo`). To update, run
+the same command again.
+
+#### Option 2: Install with Cargo
 
 ```bash
 cargo install --git https://github.com/Xapphire13/drumscribe-index.git --path cli
@@ -33,7 +46,7 @@ cargo install --git https://github.com/Xapphire13/drumscribe-index.git --path cl
 Installs `drumscribe-index` to your Cargo bin directory (`~/.cargo/bin/`),
 making it available system-wide.
 
-#### Option 2: Build from source
+#### Option 3: Build from source
 
 ```bash
 git clone https://github.com/Xapphire13/drumscribe-index.git
@@ -94,16 +107,8 @@ To also install the `drumscribe-index` CLI binary to `/usr/local/bin`:
 curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash -s -- --cli
 ```
 
-To install only the CLI (no GUI app):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Xapphire13/drumscribe-index/master/scripts/install.sh | bash -s -- --cli-only
-```
-
-Use `--cli-dir <path>` to install the CLI to a custom directory (e.g.
-`--cli-dir ~/.local/bin` if `/usr/local/bin` requires `sudo`).
-
-To update, run the same command again.
+Use `--cli-dir <path>` to install the CLI to a custom directory. To update,
+run the same command again.
 
 ### Build from source
 
