@@ -39,6 +39,9 @@ drumscribe-index
 # Fetch new posts since last cache
 drumscribe-index --update
 
+# Check if new songs are available without updating the cache (outputs JSON)
+drumscribe-index --check
+
 # Export formats (--output is optional; defaults to stdout where applicable)
 drumscribe-index --json [--output file.json]
 drumscribe-index --markdown [--output file.md]
@@ -61,7 +64,7 @@ Cache lives at `~/Library/Application Support/com.xapphire13.drumscribe-index/` 
 | `cli/src/corrections.rs` | Artist name normalization |
 | `cli/src/index_cache.rs` | Postcard binary cache read/write |
 | `cli/src/output/` | One file per format: json, markdown, html, pdf, xlsx |
-| `ui/DrumscribeIndex/SongLoader.swift` | Subprocess execution of bundled CLI |
+| `ui/DrumscribeIndex/SongLoader.swift` | Subprocess execution of bundled CLI; also runs `--check` on startup to detect new songs |
 | `ui/DrumscribeIndex/UpdateChecker.swift` | GitHub release checking and in-app update |
 | `ui/DrumscribeIndex/FavoritesStore.swift` | UserDefaults-backed favorites |
 

@@ -59,10 +59,12 @@ The compiled binary will be at `cli/target/release/drumscribe-index`.
 ### Usage
 
 On first run, the program fetches all available songs and caches them locally.
-Subsequent runs use the cache. Use `--update` to fetch new songs:
+Subsequent runs use the cache. Use `--update` to fetch new songs, or `--check`
+to see whether new songs are available without modifying the cache:
 
 ```bash
 drumscribe-index --update
+drumscribe-index --check   # outputs {"has_updates": true|false}
 ```
 
 #### Output formats
