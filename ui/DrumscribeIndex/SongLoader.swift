@@ -43,6 +43,7 @@ final class SongLoader: ObservableObject {
     @Published var state: State = .loading
     @Published var isUpdating: Bool = false
     @Published var lastUpdated: Date? = nil
+    @Published var hasNewSongs: Bool = false
 
     private let cliBinaryURL = Bundle.main.executableURL!
         .deletingLastPathComponent()
@@ -55,6 +56,7 @@ final class SongLoader: ObservableObject {
                 let groups = try await runCLI()
                 state = .loaded(groups)
                 loadLastUpdated()
+                checkForUpdates()
             } catch {
                 state = .failed(error.localizedDescription)
                 loadLastUpdated()
@@ -70,9 +72,38 @@ final class SongLoader: ObservableObject {
                 try await runCLIRaw(arguments: ["--update"])
                 let groups = try await runCLI()
                 state = .loaded(groups)
+                hasNewSongs = false
                 loadLastUpdated()
             } catch {
                 // Update failed silently; state remains loaded
+            }
+        }
+    }
+
+    func checkForUpdates() {
+        Task {
+            struct CheckResult: Decodable {
+                let hasUpdates: Bool
+            }
+            do {
+                let task = Task.detached(priority: .background) {
+                    let process = Process()
+                    process.executableURL = self.cliBinaryURL
+                    process.arguments = ["--check"]
+                    let pipe = Pipe()
+                    process.standardOutput = pipe
+                    process.standardError = FileHandle.nullDevice
+                    try process.run()
+                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                    process.waitUntilExit()
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+                    return try decoder.decode(CheckResult.self, from: data)
+                }
+                let result = try await task.value
+                hasNewSongs = result.hasUpdates
+            } catch {
+                // Fail silently
             }
         }
     }

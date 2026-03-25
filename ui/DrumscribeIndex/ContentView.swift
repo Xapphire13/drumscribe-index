@@ -151,7 +151,7 @@ private struct SongListView: View {
         }
         .id("\(sortOption)-\(isGrouped)")
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            LastUpdatedBar(date: loader.lastUpdated, isUpdating: loader.isUpdating, exportFeedback: exportFeedback)
+            LastUpdatedBar(date: loader.lastUpdated, isUpdating: loader.isUpdating, exportFeedback: exportFeedback, hasNewSongs: loader.hasNewSongs)
         }
         .searchable(text: $searchText, prompt: "Search songs or artists")
         .navigationTitle("Drumscribe Index")
@@ -272,6 +272,7 @@ private struct LastUpdatedBar: View {
     let date: Date?
     let isUpdating: Bool
     let exportFeedback: String?
+    let hasNewSongs: Bool
 
     private var label: String {
         guard let date else { return "Never updated" }
@@ -290,6 +291,9 @@ private struct LastUpdatedBar: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                     Text("Exported \(exportFeedback)")
+                } else if hasNewSongs {
+                    Image(systemName: "music.note.list")
+                    Text("New songs available")
                 } else {
                     Text(label)
                 }
