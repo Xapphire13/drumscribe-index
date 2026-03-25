@@ -18,8 +18,8 @@ use crate::{
     index_cache::IndexCache,
     models::song::{Song, SongGroup},
     output::{
-        html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
-        pdf::PdfFormatter, xlsx::XlsxFormatter,
+        html::HtmlFormatter, json::JsonFormatter, markdown::MarkdownFormatter, pdf::PdfFormatter,
+        xlsx::XlsxFormatter,
     },
 };
 
@@ -62,6 +62,10 @@ struct Cli {
     /// Update list of indexed songs
     #[arg(long)]
     update: bool,
+
+    /// Check whether new songs are available without updating the cache
+    #[arg(long)]
+    check: bool,
 }
 
 fn create_data_dir() -> Result<PathBuf> {
@@ -114,6 +118,17 @@ async fn main() -> Result<()> {
     let mut index_cache = IndexCache::load(&data_dir);
     let coffee_api = CoffeeApi::new();
 
+    if cli.check {
+        let response = coffee_api.get_posts(1, 1).await?;
+        let has_updates = response
+            .data
+            .first()
+            .map(|post| !index_cache.songs.iter().any(|s| s.id == post.id))
+            .unwrap_or(false);
+        println!("{}", serde_json::json!({ "has_updates": has_updates }));
+        return Ok(());
+    }
+
     if index_cache.is_empty() || cli.update {
         let highest_sequence_number = index_cache
             .songs
@@ -125,12 +140,12 @@ async fn main() -> Result<()> {
         loop {
             print!("Fetching page {page_number}...");
             io::stdout().flush()?;
-            let response: PageResponse<Post> = coffee_api.get_posts(page_number).await?;
+            let response: PageResponse<Post> = coffee_api.get_posts(page_number, 20).await?;
             let page: Vec<_> = response.data.iter().flat_map(Song::try_from).collect();
 
             let mut reached_existing_content = false;
 
-            // Only add songs we havent already indexed
+            // Only add songs we haven't already indexed
             let new_songs = page.into_iter().filter(|s| {
                 if let Some(highest_sequence_number) = highest_sequence_number
                     && let Ok(sequence_number) = s.sequence_number.parse::<usize>()

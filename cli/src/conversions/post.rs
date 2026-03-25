@@ -8,8 +8,6 @@ use crate::{
     models::song::{Difficulty, Song},
 };
 
-const TRANSCRIPTION_CATEGORY_ID: usize = 73_044;
-
 impl From<&Vec<Tag>> for Difficulty {
     fn from(value: &Vec<Tag>) -> Self {
         value
@@ -34,18 +32,6 @@ impl TryFrom<&ApiPost> for Song {
     type Error = Error;
 
     fn try_from(value: &ApiPost) -> Result<Self, Self::Error> {
-        if !value.tags.iter().any(|tag| {
-            if let Tag::Category { category_id } = tag
-                && *category_id == TRANSCRIPTION_CATEGORY_ID
-            {
-                true
-            } else {
-                false
-            }
-        }) {
-            return Err(anyhow!("Only transcriptions can be converted into songs"));
-        }
-
         let song_details: SongDetails = value.project_update_heading.parse()?;
 
         Ok(Song {
