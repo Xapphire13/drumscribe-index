@@ -9,6 +9,7 @@ PBXPROJ="$REPO_ROOT/ui/DrumscribeIndex.xcodeproj/project.pbxproj"
 usage() {
   echo "Usage: $0 --cli <patch|minor|major>" >&2
   echo "       $0 --ui <patch|minor|major>" >&2
+  echo "       $0 --cli <patch|minor|major> --ui <patch|minor|major>" >&2
   exit 1
 }
 
@@ -59,46 +60,58 @@ update_build_number() {
   echo "$new_build"
 }
 
-if [[ $# -ne 2 ]]; then
+CLI_BUMP=""
+UI_BUMP=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --cli) CLI_BUMP="$2"; shift 2 ;;
+    --ui)  UI_BUMP="$2";  shift 2 ;;
+    *) usage ;;
+  esac
+done
+
+if [[ -z "$CLI_BUMP" && -z "$UI_BUMP" ]]; then
   usage
 fi
 
-MODE=""
-BUMP=""
+for bump in "${CLI_BUMP:-}" "${UI_BUMP:-}"; do
+  if [[ -n "$bump" ]]; then
+    case "$bump" in
+      patch|minor|major) ;;
+      *) echo "Error: bump type must be patch, minor, or major" >&2; exit 1 ;;
+    esac
+  fi
+done
 
-case "$1" in
-  --cli) MODE="cli"; BUMP="$2" ;;
-  --ui)  MODE="ui";  BUMP="$2" ;;
-  *) usage ;;
-esac
-
-case "$BUMP" in
-  patch|minor|major) ;;
-  *) echo "Error: bump type must be patch, minor, or major" >&2; exit 1 ;;
-esac
-
-if [[ "$MODE" == "cli" ]]; then
+if [[ -n "$CLI_BUMP" ]]; then
   old_cli="$(read_cli_version)"
-  new_cli="$(bump_version "$old_cli" "$BUMP")"
-  new_ui="$(bump_version "$old_cli" "$BUMP")"  # UI tracks CLI version on CLI bumps
-
+  new_cli="$(bump_version "$old_cli" "$CLI_BUMP")"
   update_cli_version "$new_cli"
-  update_ui_version "$new_ui"
-  new_build="$(update_build_number)"
+fi
 
-  git tag -a "cli/v$new_cli" -m "cli v$new_cli"
-  git tag -a "ui/v$new_ui" -m "ui v$new_ui"
-
-  echo "CLI: $old_cli → $new_cli"
-  echo "UI:  $old_cli → $new_ui (build $new_build)"
-else
+if [[ -n "$UI_BUMP" ]]; then
   old_ui="$(read_ui_version)"
-  new_ui="$(bump_version "$old_ui" "$BUMP")"
-
+  new_ui="$(bump_version "$old_ui" "$UI_BUMP")"
   update_ui_version "$new_ui"
-  new_build="$(update_build_number)"
+fi
 
-  git tag -a "ui/v$new_ui" -m "ui v$new_ui"
+new_build="$(update_build_number)"
 
-  echo "UI: $old_ui → $new_ui (build $new_build)"
+git add "$CARGO_TOML" "$PBXPROJ"
+
+commit_msg="Bump"
+[[ -n "$CLI_BUMP" ]] && commit_msg+=" CLI to $new_cli"
+[[ -n "$CLI_BUMP" && -n "$UI_BUMP" ]] && commit_msg+=","
+[[ -n "$UI_BUMP"  ]] && commit_msg+=" UI to $new_ui"
+git commit -m "$commit_msg"
+
+[[ -n "$CLI_BUMP" ]] && git tag -a "cli/v$new_cli" -m "cli v$new_cli"
+[[ -n "$UI_BUMP"  ]] && git tag -a "ui/v$new_ui"   -m "ui v$new_ui"
+
+[[ -n "$CLI_BUMP" ]] && echo "CLI: $old_cli → $new_cli"
+if [[ -n "$UI_BUMP" ]]; then
+  echo "UI:  $old_ui → $new_ui (build $new_build)"
+else
+  echo "(build $new_build)"
 fi
